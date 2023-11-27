@@ -1,0 +1,22 @@
+java tema1 –create-user -u ‘my_username’ -p ‘my_password’
+java tema1 –create-post -u ‘my_username’ -p ‘my_password’ -text ‘Astăzi mă simt bine’
+java tema1 –delete-post-by-id -u ‘my_username’ -p ‘my_password’ -id ‘post_ id1’
+java tema1 –follow-user-by-username -u ‘my_username’ -p ‘my_password’ -username ‘username1
+java tema1 –unfollow-user-by-username -u ‘my_username’ -p ‘my_password’ -username ‘username1’
+java tema1 –like-post -u ‘my_username’ -p ‘my_password’ -post-id ‘post_id1’
+java tema1 –unlike-post -u ‘my_username’ -p ‘my_password’ -post-id ‘post_id1’
+java tema1 –like-comment -u ‘my_username’ -p ‘my_password’ -comment-id ‘comment_id1’
+java tema1 –unlike-comment -u ‘my_username’ -p ‘my_password’ -comment-id ‘comment_id1’
+java tema1 –get-followings-posts -u ‘my_username’ -p -my_password’
+java tema1 –get-user-posts -u ‘my_username’ -p -my_password’ -username ‘username1’
+java tema1 –get-post-details -u ‘my_username’ -p -my_password’ –post-id ‘post_id1
+java tema1 –comment-post -u ‘my_username’ -p ‘my_password’ –post-id ‘post_id1‘ -text ‘text1’
+java tema1 –delete-comment-by-id -u ‘my_username’ -p ‘my_password’ -id ‘comment_id1’
+java tema1 –get-following -u ‘my_username’ -p -my_password’
+java tema1 –get-followers -u ‘my_username’ -p -my_password’ -username ‘username1’
+java tema1 –get-most-liked-posts -u ‘my_username’ -p -my_password’
+java tema1 –get-most-commented-posts -u ‘my_username’ -p -my_password’
+java tema1 –get-most-followed-users -u ‘my_username’ -p -my_password’
+java tema1 –get-most-liked-users -u ‘my_username’ -p -my_password’
+java tema1 –cleanup-all
+
