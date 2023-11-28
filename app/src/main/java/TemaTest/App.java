@@ -3,12 +3,23 @@
  */
 package TemaTest;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
 public class App {
 
+
+    private static void deleteFileContents(String filename) {
+        try {
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter(filename));
+            fileOut.write("");
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static void processCommandLineArgs(java.lang.String[] strings) {
     //java tema1 "–create-user"     "-u ‘username’"     "-p ‘password’"
@@ -72,8 +83,8 @@ public class App {
         case "–get-most-liked-users":
 
             break;
-        case "–cleanup-all":
-
+        case "-cleanup-all":
+        deleteFileContents("Users.txt");
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");

@@ -35,7 +35,7 @@ public class Postare {
         String extractedParola = args[1].substring(4, args[1].length()-1);
         String extractedText;
         if(args.length == 3)
-            extractedText = args[2].substring(7,args[2].length());
+            extractedText = args[2].substring(7,args[2].length() - 1);
         else
             extractedText = "";
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
@@ -43,6 +43,7 @@ public class Postare {
         //2. Username nu există, sau username și parola sunt greșite
 
         Postare post = new Postare(newUser, extractedText);
+//        Utilizator.printUsers();
         if(!post.verifyCorrectUser(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
@@ -83,7 +84,7 @@ public class Postare {
             }
             return false;
         } catch (IOException e) {
-        e.printStackTrace();
+            e.printStackTrace();
         }
         return false;
     }
