@@ -32,8 +32,8 @@ public class App {
         case "-create-post":
             Postare.extractPostCredentials(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–delete-post-by-id":
-
+        case "-delete-post-by-id":
+            Postare.deletePostById(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "–follow-user-by-username":
 
@@ -85,6 +85,7 @@ public class App {
             break;
         case "-cleanup-all":
         deleteFileContents("Users.txt");
+        deleteFileContents("Posts.txt");
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");

@@ -65,10 +65,18 @@ public class Utilizator {
     public static boolean verifyUserAlreadyExists(Utilizator User, String file) {
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1)
+                return false;
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
             while ((line = fileIn.readLine()) != null){
                 String[] credentials = line.split(",");
-                if(User.username.equals(credentials[0]) || User.parola.equals(credentials[1]))
+                if(User.username.equals(credentials[0]) && User.parola.equals(credentials[1]))
                     return true;
             }
 
