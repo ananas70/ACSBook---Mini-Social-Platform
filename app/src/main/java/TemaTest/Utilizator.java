@@ -1,7 +1,9 @@
 package TemaTest;
 
 import java.io.BufferedWriter;
+import java.io.BufferedReader;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
 
 public class Utilizator {
@@ -33,14 +35,17 @@ public class Utilizator {
             System.out.println("{ 'status' : 'error', 'message' : 'Please provide password'}");
             return;
         }
-        //3. Utilizatorul există în sistem
-
-
-        //4. Totul a mers bine
-        //Extragem username si parola
+        //Utilizator valid
         String extractedUsername = args[0].substring(4, args[0].length()-1);
         String extractedParola = args[1].substring(4, args[1].length()-1);
         Utilizator newUser = createUser(extractedUsername, extractedParola);
+        //3. Utilizatorul există în sistem
+        if(!verifyUserAlreadyExists(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'User already exists'}");
+            return;
+        }
+        //4. Totul a mers bine
+        //Extragem username si parola
         writeUserToFile(newUser, "Users.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'User created successfully'}");
     }
@@ -57,4 +62,22 @@ public class Utilizator {
                 e.printStackTrace();
             }
         }
+        public static boolean verifyUserAlreadyExists(Utilizator User, String file) {
+            try {
+                BufferedReader fileIn = new BufferedReader(new FileReader(file));
+                String line;
+                while ((line = fileIn.readLine()) != null){
+                    String[] credentials = line.split(",");
+                    if(User.username.equals(credentials[0]) || User.parola.equals(credentials[1]))
+                        return false;
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        return true;
+        }
+
+
+
     }

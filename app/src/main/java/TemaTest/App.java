@@ -18,8 +18,8 @@ public class App {
         case "-create-user":
             Utilizator.extractUserCredentials(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–create-post":
-
+        case "-create-post":
+            Postare.extractPostCredentials(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "–delete-post-by-id":
 
