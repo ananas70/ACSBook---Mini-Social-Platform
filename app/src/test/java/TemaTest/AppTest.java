@@ -3396,7 +3396,7 @@ public class AppTest
 
     //endregion
 
-    //region 16 Lista Followers per utilizator
+    //region 16 Lista Followers.txt per utilizator
 
     @Test
     public void testGetFollowersNoUsername()

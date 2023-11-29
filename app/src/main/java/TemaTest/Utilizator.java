@@ -22,7 +22,7 @@ public class Utilizator {
         return parola;
     }
 
-    public static void extractUserCredentials(java.lang.String[] args) {
+    public static void createSystemUser(java.lang.String[] args) {
         // "-u ‘username’"     "-p ‘password’"
 
         //1. Paramentrul -u nu este furnizat
@@ -40,7 +40,7 @@ public class Utilizator {
         String extractedParola = args[1].substring(4, args[1].length()-1);
         Utilizator newUser = createUser(extractedUsername, extractedParola);
         //3. Utilizatorul există în sistem
-        if(verifyUserAlreadyExists(newUser, "Users.txt")) {
+        if(verifyUserByCredentials(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'User already exists'}");
             return;
         }
@@ -62,7 +62,41 @@ public class Utilizator {
             e.printStackTrace();
         }
     }
-    public static boolean verifyUserAlreadyExists(Utilizator User, String file) {
+
+    public static void writeFollowersToFile(String usFollows, String usFollowed, String file) {
+        try {
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
+            fileOut.write(usFollows + "FOLLOWS" + usFollowed + "\n");
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static boolean verifyUserByUsername(String Username, String file) {
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1)
+                return false;
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = fileIn.readLine()) != null){
+                String[] credentials = line.split(",");
+                if(Username.equals(credentials[0]))
+                    return true;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean verifyUserByCredentials(Utilizator User, String file) {
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             if (fileIn.read() == -1)
@@ -86,6 +120,66 @@ public class Utilizator {
         return false;
     }
 
+    public static void createSystemFollowers(java.lang.String[] args) {
+        //"-u 'test'", "-p 'test'", "-username 'test2'"
+        //1. -u, -p nu este furnizat
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        //2. Username nu există, sau username și parola sunt greșite
+        String extractedUsername = args[0].substring(4, args[0].length()-1);
+        String extractedParola = args[1].substring(4, args[1].length()-1);
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        if(!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Username-ul de urmărit nu a fost găsit
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No username to follow was provided'}");
+            return;
+        }
+        String userToFollow = args[2].substring(11, args[2].length()-1);
+        //4. Username-ul de urmărit nu este corect
+        if(!verifyUserByUsername(userToFollow, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
+            return;
+        }
+        //sau acest username este deja urmărit
+        if(searchAlreadyFollowed(extractedUsername, userToFollow, "Followers.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
+            return;
+        }
+        //totul a mers bine
+        writeFollowersToFile(extractedUsername, userToFollow, "Followers.txt");
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+
+    }
+
+    public static boolean searchAlreadyFollowed(String usFollows, String usFollowed, String file) {
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1)
+                return false;
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = fileIn.readLine()) != null){
+                String users[] = line.split("FOLLOWS");
+                if(usFollows.equals(users[0]) && usFollowed.equals(users[1]))
+                    return true;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public static void printUsers(){
         try{
             BufferedReader fileIn = new BufferedReader(new FileReader("Users.txt"));

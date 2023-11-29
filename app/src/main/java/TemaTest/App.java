@@ -27,16 +27,16 @@ public class App {
     String command = strings[0];
     switch (command) {
         case "-create-user":
-            Utilizator.extractUserCredentials(Arrays.copyOfRange(strings,1,strings.length));
+            Utilizator.createSystemUser(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-create-post":
-            Postare.extractPostCredentials(Arrays.copyOfRange(strings,1,strings.length));
+            Postare.createSystemPost(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-delete-post-by-id":
             Postare.deletePostById(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–follow-user-by-username":
-
+        case "-follow-user-by-username":
+            Utilizator.createSystemFollowers(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "–unfollow-user-by-username":
 

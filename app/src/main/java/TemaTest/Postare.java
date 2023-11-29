@@ -22,7 +22,7 @@ public class Postare {
     public String getText() {
         return text;
     }
-    public static void extractPostCredentials(java.lang.String[] args) {
+    public static void createSystemPost(java.lang.String[] args) {
         //"-u 'test'", "-p 'test'", "-text 'Astazi ma simt bine'"
         //1. Paramentrii -u sau -p lipsa
         if (args.length == 0 || args.length == 1) {
@@ -42,7 +42,7 @@ public class Postare {
         //2. Username nu există, sau username și parola sunt greșite
 
         Postare post = new Postare(newUser, extractedText);
-        if(!Utilizator.verifyUserAlreadyExists(newUser, "Users.txt")) {
+        if(!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -76,7 +76,7 @@ public class Postare {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if(!Utilizator.verifyUserAlreadyExists(newUser, "Users.txt")) {
+        if(!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
