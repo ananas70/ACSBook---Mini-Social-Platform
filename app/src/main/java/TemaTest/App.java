@@ -45,8 +45,9 @@ public class App {
             Postare postare = new Postare();
             postare.like(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–unlike-post":
-
+        case "-unlike-post":
+            postare = new Postare();
+            postare.unlike(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "–like-comment":
 
