@@ -5,6 +5,7 @@ import java.io.*;
 public class Postare implements Likeable {
     private Utilizator user;
     private String text;
+    private int likes;
     private static int id = 0;
 
     public Postare() {
@@ -13,6 +14,7 @@ public class Postare implements Likeable {
     public Postare(Utilizator user, String text) {
         this.user = user;
         this.text = text;
+        this.likes = 0;
     }
 
     public String getUsername() {
@@ -103,15 +105,8 @@ public class Postare implements Likeable {
     public static void writePostToFile(Postare postare, String file) {
         id++;
         //empty file - reset id
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1) {
-                id = 1;
-            }
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+       if(FileUtils.isEmptyFile(file))
+           id=1;
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
             fileOut.write("USER:" + postare.getUsername() + ",ID:" + id + ",POST:" + postare.getText() + '\n');
@@ -124,20 +119,15 @@ public class Postare implements Likeable {
     public static String verifyPostById(int givenId, String file) {
         String emptyString = "";
         //empty file
+        if(FileUtils.isEmptyFile(file))
+            return emptyString;
         try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return emptyString;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
+            //"USER:username,ID:id,POST:postare
             BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
             String line;
             while ((line = fileIn.readLine()) != null && givenId > 0) {
-                givenId--;
-                if (givenId == 0)
+               String parts[] = line.split(",");
+                if (Integer.parseInt(parts[1].substring(3)) == givenId)
                     return line;
             }
         } catch (IOException e) {
@@ -146,6 +136,34 @@ public class Postare implements Likeable {
         return emptyString;
     }
 
+    public static Postare getPostById(int givenId) {
+        //empty file
+        if(FileUtils.isEmptyFile("Posts.txt"))
+            return null;
+        try {
+            //"USER:username,ID:id,POST:postare
+            BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
+            String line;
+            while ((line = fileIn.readLine()) != null && givenId > 0) {
+                String[] parts = line.split(",");
+                int foundId = Integer.parseInt(parts[1].substring(3));
+                if(givenId == foundId) {
+                    String username = parts[0].substring(5);
+                    Utilizator user = Utilizator.getUserByUsername(username);
+                    if(user == null)
+                    {
+                        System.out.println("Eroare la gasirea utilizatorului in baza de date");
+                        System.exit(1);
+                    }
+                    String text = parts[2].substring(5);
+                    return new Postare(user, text);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static void deletePostFromFile(String text) {
         File inputFile = new File("Posts.txt");
         File temporaryFile = new File("TempFile.txt");
@@ -197,7 +215,7 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea de apreciat nu este corectă (sau această postare este deja apreciată, sau este a utilizatorului curent)
-        if (verifyUserLikesHimself(extractedUsername, givenId, "Posts.txt")) {
+        if(verifyUserLikesHimself(extractedUsername, givenId, "Posts.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
@@ -206,21 +224,15 @@ public class Postare implements Likeable {
             return;
         }
         //Totul a mers bine
+        this.likes++;
         writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
     }
 
     public static boolean verifyUserLikesHimself(String userLikes, int givenId, String file) {
-        //empty file
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return false;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
@@ -240,15 +252,8 @@ public class Postare implements Likeable {
     }
 
     public static boolean verifyPostAlreadyLiked(String userLikes, int givenId, String file) {
-        //empty file
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return false;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
@@ -313,11 +318,12 @@ public class Postare implements Likeable {
             return;
         }
         //Totul a mers bine
+        this.likes--;
         unlikePostFromFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
 
-    public static void unlikePostFromFile(String userLikes, int givenId) {
+    private static void unlikePostFromFile(String userLikes, int givenId) {
         File inputFile = new File("PostLikes.txt");
         File temporaryFile = new File("TempFile.txt");
         try {

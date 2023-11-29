@@ -69,14 +69,8 @@ public class Utilizator {
         }
     }
     public static boolean verifyUserByUsername(String Username, String file) {
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return false;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
@@ -92,15 +86,26 @@ public class Utilizator {
         return false;
     }
 
-    public static boolean verifyUserByCredentials(Utilizator User, String file) {
+    public static Utilizator getUserByUsername(String Username) {
+        if(FileUtils.isEmptyFile("Users.txt"))
+            return null;
         try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return false;
-            fileIn.close();
+            BufferedReader fileIn = new BufferedReader(new FileReader("Users.txt"));
+            String line;
+            while ((line = fileIn.readLine()) != null){
+                String[] parts = line.split(",");
+                if(Username.equals(parts[0]))
+                    return createUser(Username, parts[1]);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    public static boolean verifyUserByCredentials(Utilizator User, String file) {
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
@@ -210,14 +215,8 @@ public class Utilizator {
     }
 
     public static boolean searchAlreadyFollowed(String usFollows, String usFollowed, String file) {
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return false;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
@@ -226,22 +225,9 @@ public class Utilizator {
                 if(usFollows.equals(users[0]) && usFollowed.equals(users[1]))
                     return true;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
         return false;
     }
-    public static void printContent(String file){
-        try{
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = fileIn.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

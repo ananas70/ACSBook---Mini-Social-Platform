@@ -49,40 +49,41 @@ public class App {
             postare = new Postare();
             postare.unlike(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–like-comment":
+        case "-like-comment":
+            Comentariu comentariu = new Comentariu();
+            comentariu.like(Arrays.copyOfRange(strings,1,strings.length));
+            break;
+        case "-get-followings-posts":
 
             break;
-        case "–get-followings-posts":
+        case "-get-user-posts":
 
             break;
-        case "–get-user-posts":
+        case "-get-post-details":
 
             break;
-        case "–get-post-details":
+        case "-comment-post":
+            Comentariu.createSystemComment(Arrays.copyOfRange(strings,1,strings.length));
+            break;
+        case "-delete-comment-by-id":
 
             break;
-        case "–comment-post":
+        case "-get-following":
 
             break;
-        case "–delete-comment-by-id":
+        case "-get-followers":
 
             break;
-        case "–get-following":
+        case "-get-most-liked-posts":
 
             break;
-        case "–get-followers":
+        case "-get-most-commented-posts":
 
             break;
-        case "–get-most-liked-posts":
+        case "-get-most-followed-users":
 
             break;
-        case "–get-most-commented-posts":
-
-            break;
-        case "–get-most-followed-users":
-
-            break;
-        case "–get-most-liked-users":
+        case "-get-most-liked-users":
 
             break;
         case "-cleanup-all":
@@ -90,6 +91,7 @@ public class App {
         deleteFileContents("Posts.txt");
         deleteFileContents("Followers.txt");
         deleteFileContents("PostLikes.txt");
+        deleteFileContents("Comments.txt");
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");
