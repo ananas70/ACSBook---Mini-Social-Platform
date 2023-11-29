@@ -38,11 +38,12 @@ public class App {
         case "-follow-user-by-username":
             Utilizator.createSystemFollowers(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–unfollow-user-by-username":
-
+        case "-unfollow-user-by-username":
+            Utilizator.unfollowUserByUsername(Arrays.copyOfRange(strings,1,strings.length));
             break;
-        case "–like-post":
-
+        case "-like-post":
+            Postare postare = new Postare();
+            postare.like(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "–unlike-post":
 
@@ -86,6 +87,8 @@ public class App {
         case "-cleanup-all":
         deleteFileContents("Users.txt");
         deleteFileContents("Posts.txt");
+        deleteFileContents("Followers.txt");
+        deleteFileContents("PostLikes.txt");
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");

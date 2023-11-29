@@ -1,10 +1,6 @@
 package TemaTest;
 
-import java.io.BufferedWriter;
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Utilizator {
     private String username, parola;
@@ -157,6 +153,62 @@ public class Utilizator {
 
     }
 
+    public static void unfollowUserByUsername(java.lang.String[] args) {
+        //"-unfollow-user-by-username", "-u 'test'", "-p 'test'", "-username 'test2'"
+        //1. -u, -p nu este furnizat
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        //2. Username nu există, sau username și parola sunt greșite
+        String extractedUsername = args[0].substring(4, args[0].length()-1);
+        String extractedParola = args[1].substring(4, args[1].length()-1);
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        if(!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Username-ul pentru unfollow nu a fost găsit
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No username to unfollow was provided'}");
+            return;
+        }
+        String userToUnfollow = args[2].substring(11, args[2].length()-1);
+        //4. Username-ul de urmărit nu este corect
+        if(!verifyUserByUsername(userToUnfollow, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The username to unfollow was not valid'}");
+            return;
+        }
+        //sau acest username este deja unfollowed
+        if(!searchAlreadyFollowed(extractedUsername, userToUnfollow, "Followers.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The username to unfollow was not valid'}");
+            return;
+        }
+        //Totul a mers bine
+        deleteFollower(extractedUsername, userToUnfollow);
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+    }
+
+
+    public static void deleteFollower(String usFollows, String usFollowed) {
+        File inputFile = new File("Followers.txt");
+        File temporaryFile = new File("TempFile.txt");
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String users[] = line.split("FOLLOWS");
+                if(!(users[0].equals(usFollows) && users[1].equals(usFollowed)))
+                    writer.write(line + "\n");
+            }
+            boolean s = temporaryFile.renameTo(inputFile);
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
     public static boolean searchAlreadyFollowed(String usFollows, String usFollowed, String file) {
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
@@ -180,9 +232,9 @@ public class Utilizator {
         }
         return false;
     }
-    public static void printUsers(){
+    public static void printContent(String file){
         try{
-            BufferedReader fileIn = new BufferedReader(new FileReader("Users.txt"));
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
             while ((line = fileIn.readLine()) != null) {
                 System.out.println(line);

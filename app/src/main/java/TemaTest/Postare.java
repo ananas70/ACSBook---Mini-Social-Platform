@@ -2,7 +2,7 @@ package TemaTest;
 
 import java.io.*;
 
-public class Postare {
+public class Postare implements Likeable {
     private Utilizator user;
     private String text;
     private static int id = 0;
@@ -60,7 +60,7 @@ public class Postare {
         //5.Totul a mers bine
         writePostToFile(post, "Posts.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Post added successfully'}");
-//        printPosts();
+//        Utilizator.printContent("Posts.txt");
     }
     public static void deletePostById(java.lang.String[] args) {
         //–delete-post-by-id -u ‘my_username’ -p ‘my_password’ -id ‘post_ id1’
@@ -90,19 +90,25 @@ public class Postare {
             return;
         }
         // 4. succes
-        deletePostFromFile(foundPost, "Posts.txt");
+        deletePostFromFile(foundPost);
         System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
     }
 
-
-
-
     public static void writePostToFile(Postare postare, String file) {
         id++;
+        //empty file - reset id
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1) {
+                id = 1;
+            }
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
-//            fileOut.write("User:" + postare.getUsername() + "\n");
-            fileOut.write(postare.getText() + '\n');
+            fileOut.write("USER:" + postare.getUsername() + ",ID:" + id + ",POST:" + postare.getText() + '\n');
             fileOut.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,9 +140,9 @@ public class Postare {
         return emptyString;
     }
 
-    public static void deletePostFromFile(String text, String file) {
-        File inputFile = new File("myFile.txt");
-        File temporaryFile = new File("myTempFile.txt");
+    public static void deletePostFromFile(String text) {
+        File inputFile = new File("Posts.txt");
+        File temporaryFile = new File("TempFile.txt");
         try{
             BufferedReader reader = new BufferedReader(new FileReader(inputFile));
             BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
@@ -150,16 +156,114 @@ public class Postare {
             e.printStackTrace();
         }
     }
-    public static void printPosts(){
+
+    @Override
+    public void like(String[] args) {
+        //"-u 'test'", "-p 'test'", "-post-id '1'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length()-1);
+        String extractedParola = args[1].substring(4, args[1].length()-1);
+
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if(!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Post Id not provided
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No post identifier to like was provided'}");
+            return;
+        }
+        //4. Post Id not found
+        String extractedId = args[2].substring(10,args[2].length() - 1);
+        int givenId = Integer.parseInt(extractedId);
+        String emptyString = "", foundPost;
+        foundPost = (verifyPostById(givenId, "Posts.txt"));
+        if(foundPost.equals(emptyString)) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
+            return;
+        }
+        //Postarea de apreciat nu este corectă (sau această postare este deja apreciată, sau este a utilizatorului curent)
+        if(verifyUserLikesHimself(extractedUsername, givenId, "Posts.txt")){
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
+            return;
+        }
+        if(verifyPostAlreadyLiked(extractedUsername, givenId, "PostLikes.txt")){
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
+            return;
+        }
+        //Totul a mers bine
+        writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+
+    }
+    public static boolean verifyUserLikesHimself(String userLikes, int givenId, String file) {
+        //empty file
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1)
+                return false;
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try{
-            BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
             while ((line = fileIn.readLine()) != null) {
-                System.out.println(line);
+                //"USER:user,ID:id,POST:post"
+                String[] parts =  line.split(",");
+                String userLiked = parts[0].substring(5);
+                String likedIdString = parts[1].substring(3);
+                int likedId = Integer.parseInt(likedIdString);
+                if(likedId == givenId && userLikes.equals(userLiked))
+                    return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
+    public static boolean verifyPostAlreadyLiked(String userLikes, int givenId, String file) {
+        //empty file
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            if (fileIn.read() == -1)
+                return false;
+            fileIn.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try{
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = fileIn.readLine()) != null) {
+               //testLIKES1
+                String[] parts = line.split("LIKES");
+                int foundId = Integer.parseInt(parts[1]);
+                if(userLikes.equals(parts[0]) && givenId == foundId)
+                    return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static void writePostLikeToFile(String userLikes, int givenId, String file) {
+        try {
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
+            fileOut.write(userLikes + "LIKES" + givenId + "\n");
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
