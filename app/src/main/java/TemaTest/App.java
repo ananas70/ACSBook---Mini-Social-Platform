@@ -64,7 +64,7 @@ public class App {
             Postare.getUserPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-post-details":
-
+            Postare.getPostDetails(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-comment-post":
             Comentariu.createSystemComment(Arrays.copyOfRange(strings,1,strings.length));

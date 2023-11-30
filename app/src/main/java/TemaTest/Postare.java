@@ -1,11 +1,9 @@
 package TemaTest;
 
-import org.w3c.dom.ls.LSOutput;
-
-import javax.crypto.spec.PSource;
 import java.io.*;
-import java.util.*;
 import java.text.SimpleDateFormat;
+import java.util.*;
+
 
 public class Postare implements Likeable {
     private Utilizator user;
@@ -13,7 +11,7 @@ public class Postare implements Likeable {
     private int likes, id;
     private Date timestamp;
     private static int idCounter = 0;
-//    static SimpleDateFormat testDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     static ArrayList<Postare> PostsArray = new ArrayList<>();
 
     public Postare() {
@@ -170,7 +168,15 @@ public class Postare implements Likeable {
         return emptyString;
     }
 
-    public static Postare getPostById(int givenId) {
+    public static Postare getPostByIdARRAYLIST(int givenId) {
+        for(Postare post : PostsArray)
+            if(post.getId() == givenId)
+                return post;
+        return null;
+    }
+
+
+    public static Postare getPostByIdFILE(int givenId) {
         //empty file
         if(FileUtils.isEmptyFile("Posts.txt"))
             return null;
@@ -404,7 +410,7 @@ public class Postare implements Likeable {
             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
             return;
         }
-        if(!Utilizator.searchAlreadyFollowed(extractedUsername, followedUser, "Followers.txt")){
+        if(!Utilizator.verifyAlreadyFollowed(extractedUsername, followedUser, "Followers.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
             return;
         }
@@ -421,8 +427,51 @@ public class Postare implements Likeable {
         System.out.print("{'status' : 'ok', 'message' :" + " [");
         FileUtils.printArrayList(userPosts);
         System.out.print("]}");
-
     }
 
+    public static void getPostDetails(java.lang.String[] args){
+        //"-u 'test'", "-p 'test'", "-post-id '1'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
+
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Identificatorul pentru postare nu a fost găsit
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No post identifier was provided'}");
+            return;
+        }
+        //4. Identificatorul pentru postare nu este corect (sau acest username este deja unfollowed)
+        int givenId = Integer.parseInt(args[2].substring(10, args[2].length()-1));
+        String emptyString = "";
+        if(verifyPostById(givenId, "Posts.txt").equals(emptyString)){
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
+            return;
+        }
+
+        Postare post = Postare.getPostByIdARRAYLIST(givenId);
+        if(post == null) {
+            System.out.println("Eroare la cautarea postarii in baza de date");
+            System.exit(1);
+        }
+        if(!Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt")){
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
+            return;
+        }
+        //5. Totul a mers bine (BINEE BAI, esti tare, recunoastem)
+        System.out.print("{'status' : 'ok', 'message' : [{'post_text' : '"+post.text+"', 'post_date' :'" + dateFormat.format(post.timestamp) + "', 'username' : '"+post.user+"', 'number_of_likes' :" +" '"+post.likes+"', ");
+//        System.out.print("'comments' : [{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}] }] }");
+
+    }
 
 }

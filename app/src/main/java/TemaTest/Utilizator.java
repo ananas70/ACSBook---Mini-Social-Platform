@@ -149,7 +149,7 @@ public class Utilizator {
             return;
         }
         //sau acest username este deja urmărit
-        if(searchAlreadyFollowed(extractedUsername, userToFollow, "Followers.txt")) {
+        if(verifyAlreadyFollowed(extractedUsername, userToFollow, "Followers.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The username to follow was not valid'}");
             return;
         }
@@ -186,7 +186,7 @@ public class Utilizator {
             return;
         }
         //sau acest username este deja unfollowed
-        if(!searchAlreadyFollowed(extractedUsername, userToUnfollow, "Followers.txt")) {
+        if(!verifyAlreadyFollowed(extractedUsername, userToUnfollow, "Followers.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The username to unfollow was not valid'}");
             return;
         }
@@ -215,7 +215,7 @@ public class Utilizator {
         }
     }
 
-    public static boolean searchAlreadyFollowed(String usFollows, String usFollowed, String file) {
+    public static boolean verifyAlreadyFollowed(String usFollows, String usFollowed, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
         try {

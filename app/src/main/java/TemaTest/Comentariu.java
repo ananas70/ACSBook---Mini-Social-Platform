@@ -65,7 +65,7 @@ public class Comentariu implements Likeable {
             return;
         }
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length() - 1));
-        Postare parentPost = Postare.getPostById(givenId);
+        Postare parentPost = Postare.getPostByIdFILE(givenId);
         //4.Comentariul are peste 300 de caractere
         if (extractedText.length() > 300) {
             System.out.println("{ 'status' : 'error', 'message' : 'Comment text length exceeded'}");
