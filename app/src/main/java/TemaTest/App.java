@@ -66,7 +66,7 @@ public class App {
             Comentariu.createSystemComment(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-delete-comment-by-id":
-
+            Comentariu.deleteCommentById(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-following":
 
@@ -92,6 +92,7 @@ public class App {
         deleteFileContents("Followers.txt");
         deleteFileContents("PostLikes.txt");
         deleteFileContents("Comments.txt");
+        deleteFileContents("CommentLikes.txt");
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");

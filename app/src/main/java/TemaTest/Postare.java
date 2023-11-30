@@ -71,7 +71,6 @@ public class Postare implements Likeable {
     }
 
     public static void deletePostById(java.lang.String[] args) {
-        //–delete-post-by-id -u ‘my_username’ -p ‘my_password’ -id ‘post_ id1’
         //"-u 'test'", "-p 'test'", "-id '1'"
         //1. Paramentrii -u sau -p lipsa
         if (args.length == 0 || args.length == 1) {
@@ -88,7 +87,12 @@ public class Postare implements Likeable {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
-        //3. Id not found
+        //3. Id not provided
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No identifier was provided'}");
+            return;
+        }
+        //4. Id not found
         String extractedId = args[2].substring(5, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
         String emptyString = "", foundPost;
@@ -97,7 +101,7 @@ public class Postare implements Likeable {
             System.out.println("{ 'status' : 'error', 'message' : 'The identifier was not valid'}");
             return;
         }
-        // 4. succes
+        // 5. succes
         deletePostFromFile(foundPost);
         System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
     }
@@ -215,7 +219,7 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea de apreciat nu este corectă (sau această postare este deja apreciată, sau este a utilizatorului curent)
-        if(verifyUserLikesHimself(extractedUsername, givenId, "Posts.txt")){
+        if(verifyUserLikesHisPost(extractedUsername, givenId, "Posts.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
@@ -230,7 +234,7 @@ public class Postare implements Likeable {
 
     }
 
-    public static boolean verifyUserLikesHimself(String userLikes, int givenId, String file) {
+    public static boolean verifyUserLikesHisPost(String userLikes, int givenId, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
         try {

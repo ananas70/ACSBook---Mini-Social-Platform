@@ -90,6 +90,86 @@ public class Comentariu implements Likeable {
         }
     }
 
+    public static void deleteCommentById(java.lang.String[] args) {
+        //"-u 'test2'", "-p 'test2'", "-id '1'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Id not provided
+        if(args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No identifier was provided'}");
+            return;
+        }
+        //4. Id not found
+        int givenId = Integer.parseInt(args[2].substring(5, args[2].length() - 1));
+        String emptyString = "", foundComment;
+        foundComment = (verifyCommentById(givenId, "Comments.txt"));
+        if (foundComment.equals(emptyString) || !(PermissionToDelete(foundComment, extractedUsername))) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The identifier was not valid'}");
+            return;
+        }
+        // 5. succes
+        deleteCommentFromFile(foundComment);
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+    }
+
+    public static boolean PermissionToDelete(String line, String username) {
+        //line e USER:user,POST_ID:id,COMMENT_ID:id,COMMENT:text (o linie intreaga din comments)
+        String parts[] = line.split(",");
+            if(!(parts[0].substring(5).equals(username)))
+                return false; // permission denied
+        return true;
+    }
+    public static String verifyCommentById(int givenId, String file) {
+        String emptyString = "";
+        //empty file
+        if(FileUtils.isEmptyFile(file))
+            return emptyString;
+        try {
+            //USER:user,POST_ID:id,COMMENT_ID:id,COMMENT:text
+            BufferedReader fileIn = new BufferedReader(new FileReader("Comments.txt"));
+            String line;
+            while ((line = fileIn.readLine()) != null) {
+                String parts[] = line.split(",");
+                if (Integer.parseInt(parts[2].substring(11)) == givenId)
+                        return line;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return emptyString;
+    }
+
+    public static void deleteCommentFromFile(String text) {
+        File inputFile = new File("Comments.txt");
+        File temporaryFile = new File("TempFile.txt");
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
+            writer.write("");
+            String line;
+            while ((line = reader.readLine()) != null)
+                if (!line.equals(text))
+                    writer.write(line + "\n");
+            FileUtils.copyFile("TempFile.txt","Posts.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void like(String[] args) {
         //"-like-comment", "-u 'test'", "-p 'test'", "-comment-id '1'"
@@ -108,58 +188,79 @@ public class Comentariu implements Likeable {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
-        //3. Post Id not provided
+        //3. Comment Id not provided
         if (args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No comment identifier to like was provided'}");
             return;
         }
-        //4. Comment Id not found
-        String extractedId = args[2].substring(13, args[2].length() - 1);
-        int givenId = Integer.parseInt(extractedId);
-        String emptyString = "", foundPost;
-        foundPost = (verifyCommentById(givenId, "Comments.txt"));
-        if (foundPost.equals(emptyString)) {
+        //4. Id not found
+        int givenId = Integer.parseInt(args[2].substring(13, args[2].length() - 1));
+        String emptyString = "", foundComment;
+        foundComment = (verifyCommentById(givenId, "Comments.txt"));
+        if (foundComment.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
             return;
         }
         //Comentariul de apreciat nu este corect (sau acest comenatriu este deja apreciat, sau este al utilizatorului curent)
-//        if (verifyUserLikesHimself(extractedUsername, givenId, "Posts.txt")) {
-//            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
+//        if (verifyUserLikesHisComment(extractedUsername, givenId, "Comments.txt")) {
+//            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
 //            return;
 //        }
-//        if (verifyPostAlreadyLiked(extractedUsername, givenId, "PostLikes.txt")) {
-//            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
-//            return;
-//        }
-//        //Totul a mers bine
-//        writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
-//        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
+        if (verifyCommentAlreadyLiked(extractedUsername, givenId, "CommentLikes.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
+            return;
+        }
+        //Totul a mers bine
+        this.likes++;
+        writeCommentLikeToFile(extractedUsername, givenId, "CommentLikes.txt");
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
 
-
-    public static String verifyCommentById(int givenId, String file) {
-        String emptyString = "";
-        //empty file
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            if (fileIn.read() == -1)
-                return emptyString;
-            fileIn.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static boolean verifyUserLikesHisComment(String userLikes, int givenId, String file) {
+        if(FileUtils.isEmptyFile(file))
+            return false;
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(file));
             String line;
-            while ((line = fileIn.readLine()) != null && givenId > 0) {
-                givenId--;
-                if (givenId == 0)
-                    return line;
+            while ((line = fileIn.readLine()) != null) {
+                //"USER:username,POST_ID:id,COMMENT_ID:id,COMMENT:text
+                String[] parts = line.split(",");
+                String userLiked = parts[0].substring(5);
+                int likedId = Integer.parseInt(parts[1].substring(8));
+                if (likedId == givenId && userLikes.equals(userLiked))
+                    return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return emptyString;
+        return false;
+    }
+    public static void writeCommentLikeToFile(String userLikes, int givenId, String file) {
+        try {
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
+            fileOut.write(userLikes + "LIKES" + givenId + "\n");
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static boolean verifyCommentAlreadyLiked(String userLikes, int givenId, String file) {
+        if(FileUtils.isEmptyFile(file))
+            return false;
+        try {
+            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            String line;
+            while ((line = fileIn.readLine()) != null) {
+                //testLIKES1
+                String[] parts = line.split("LIKES");
+                int foundId = Integer.parseInt(parts[1]);
+                if (userLikes.equals(parts[0]) && givenId == foundId)
+                    return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 
