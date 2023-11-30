@@ -1,8 +1,11 @@
 package TemaTest;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 
 public class FileUtils {
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     public static void copyFile(String sourceFilePath, String destinationFilePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(sourceFilePath));
@@ -40,6 +43,20 @@ public class FileUtils {
             e.printStackTrace();
         }
     return false;
+    }
+
+    public static void myprintArrayList(ArrayList<Postare> PostsArray) {
+        for(Postare postare : PostsArray)
+            System.out.println(postare.getUsername() + postare.getText() + postare.getTimestamp() + postare.getId());
+    }
+
+    public static void printArrayList(ArrayList<Postare> PostsArray) {
+        for(Postare postare : PostsArray){
+            System.out.print("{'post_id' : '"+postare.getId()+"', 'post_text' : '"+postare.getText()+"', 'post_date' : '" + dateFormat.format(postare.getTimestamp())+ "'}");
+            if(!(PostsArray.indexOf(postare) == PostsArray.size()-1))
+                System.out.print(",");
+    }
+
     }
 
 }

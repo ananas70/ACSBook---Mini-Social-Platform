@@ -61,7 +61,7 @@ public class App {
 
             break;
         case "-get-user-posts":
-
+            Postare.getUserPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-post-details":
 
@@ -97,6 +97,8 @@ public class App {
         deleteFileContents("PostLikes.txt");
         deleteFileContents("Comments.txt");
         deleteFileContents("CommentLikes.txt");
+        Postare.PostsArray.clear();
+
             break;
         default:
             System.out.println("Comanda necunoscuta eeh");

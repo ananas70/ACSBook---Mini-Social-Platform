@@ -4,6 +4,7 @@ import java.io.*;
 
 public class Utilizator {
     private String username, parola;
+//    private static int id = 0;
 
     public Utilizator(String username, String parola) {
         this.username = username;

@@ -20,3 +20,9 @@ java tema1 –get-most-followed-users -u ‘my_username’ -p -my_password’
 java tema1 –get-most-liked-users -u ‘my_username’ -p -my_password’
 java tema1 –cleanup-all
 
+Users.txt: username,parola
+Posts.txt: USER:username,ID:id,POST:text
+Comments.txt: USER:username,POST_ID:id,COMMENT_ID:id,COMMENT:text
+Followers.txt: userFOLLOWSuser
+PostLikes.txt: userLIKESid
+CommentLikes.txt: userLIKESid
