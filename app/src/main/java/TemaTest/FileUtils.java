@@ -3,6 +3,7 @@ package TemaTest;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class FileUtils {
     static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -45,17 +46,33 @@ public class FileUtils {
     return false;
     }
 
-    public static void myprintArrayList(ArrayList<Postare> PostsArray) {
+    public static void myprintArrayListPosts(ArrayList<Postare> PostsArray) {
         for(Postare postare : PostsArray)
             System.out.println(postare.getUsername() + postare.getText() + postare.getTimestamp() + postare.getId());
     }
-
-    public static void printArrayList(ArrayList<Postare> PostsArray) {
+    public static void myprintArrayListComments(ArrayList<Comentariu> CommentsArray) {
+        System.out.println("MEAP");
+        for(Comentariu comentariu: CommentsArray)
+            System.out.println(comentariu.getUsername() + comentariu.getText() + comentariu.getTimestamp());
+    }
+    public static void printPostDetails(ArrayList<Postare> PostsArray) {
+        //formats as requested in tests
         for(Postare postare : PostsArray){
             System.out.print("{'post_id' : '"+postare.getId()+"', 'post_text' : '"+postare.getText()+"', 'post_date' : '" + dateFormat.format(postare.getTimestamp())+ "'}");
             if(!(PostsArray.indexOf(postare) == PostsArray.size()-1))
                 System.out.print(",");
+        }
     }
+
+    public static void printPostComments(ArrayList<Comentariu> CommentsArray) {
+        //formats as requested in tests
+        //       System.out.print("{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}");
+        System.out.print("'comments' : [");
+        for (Comentariu comentariu : CommentsArray) {
+            System.out.print("{'comment_id' : '"+comentariu.getId()+"' ," +" 'comment_text' : '"+comentariu.getText()+"', 'comment_date' : '" + dateFormat.format(comentariu.getTimestamp()) + "', " +"'username' : '"+comentariu.getUsername()+"', 'number_of_likes' : '"+comentariu.getLikes()+"'}");
+            if(!(CommentsArray.indexOf(comentariu) == CommentsArray.size()-1))
+                System.out.print(",");
+        }
 
     }
 

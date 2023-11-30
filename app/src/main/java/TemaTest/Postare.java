@@ -169,6 +169,10 @@ public class Postare implements Likeable {
     }
 
     public static Postare getPostByIdARRAYLIST(int givenId) {
+        if(PostsArray == null){
+            System.out.println("Eroare la accesarea PostsArray");
+            return null;
+        }
         for(Postare post : PostsArray)
             if(post.getId() == givenId)
                 return post;
@@ -425,7 +429,7 @@ public class Postare implements Likeable {
         Collections.sort(userPosts, Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
         //afisare yayy
         System.out.print("{'status' : 'ok', 'message' :" + " [");
-        FileUtils.printArrayList(userPosts);
+        FileUtils.printPostDetails(userPosts);
         System.out.print("]}");
     }
 
@@ -453,25 +457,34 @@ public class Postare implements Likeable {
         }
         //4. Identificatorul pentru postare nu este corect (sau acest username este deja unfollowed)
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length()-1));
-        String emptyString = "";
-        if(verifyPostById(givenId, "Posts.txt").equals(emptyString)){
-            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
-            return;
-        }
+//        String emptyString = "";
+//        if(verifyPostById(givenId, "Posts.txt").equals(emptyString)){
+//            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
+//            return;
+//        }
 
-        Postare post = Postare.getPostByIdARRAYLIST(givenId);
+        Postare post = new Postare();
+        post = getPostByIdARRAYLIST(givenId);
         if(post == null) {
-            System.out.println("Eroare la cautarea postarii in baza de date");
-            System.exit(1);
-        }
-        if(!Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
             return;
         }
-        //5. Totul a mers bine (BINEE BAI, esti tare, recunoastem)
+        if(!(extractedUsername.equals(post.getUsername())))
+            if(!Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt")){
+//            System.out.println("u1: "+extractedUsername + " u2:" + post.getUsername());
+            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
+            return;
+        }
+        //5. Totul a mers bine
         System.out.print("{'status' : 'ok', 'message' : [{'post_text' : '"+post.text+"', 'post_date' :'" + dateFormat.format(post.timestamp) + "', 'username' : '"+post.user+"', 'number_of_likes' :" +" '"+post.likes+"', ");
-//        System.out.print("'comments' : [{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}] }] }");
-
+//       System.out.print("'comments' : [{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}] }] }");
+        //ne trebuie un array cu comentariile
+        ArrayList <Comentariu> postComments = Comentariu.getPostComments(post);
+        //sortare yayy
+        Collections.sort(postComments, Collections.reverseOrder(Comparator.comparing(Comentariu::getTimestamp)));
+        //afisare yayy
+        FileUtils.printPostComments(postComments);
+        System.out.print("] }] }");
     }
 
 }

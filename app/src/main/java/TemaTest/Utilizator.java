@@ -18,6 +18,10 @@ public class Utilizator {
     public String getParola() {
         return parola;
     }
+    @Override
+    public String toString() {
+        return this.username; // Pt ca altfel afisa Utilizator@352ff4da
+    }
 
     public static void createSystemUser(java.lang.String[] args) {
         // "-u ‘username’"     "-p ‘password’"

@@ -1,14 +1,20 @@
 package TemaTest;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class Comentariu implements Likeable {
     private Utilizator user;
     private String text;
-    private int likes;
+    private int likes, id;
     private Postare parentPost;
+    private Date timestamp;
+    private static int idCounter = 0;
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
-    private static int id = 0;
+    static ArrayList<Comentariu> CommentsArray = new ArrayList<>();
 
     public Comentariu(){}
     public Comentariu(Utilizator User, String comment, Postare parentPost){
@@ -16,6 +22,7 @@ public class Comentariu implements Likeable {
         this.text = comment;
         this.likes = 0;
         this.parentPost = parentPost;
+        this.timestamp = new Date();
     }
     public String getUsername() {
         return user.getUsername();
@@ -32,6 +39,13 @@ public class Comentariu implements Likeable {
     public int getLikes() {
         return likes;
     }
+    public int getId() {
+        return id;
+    }
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
 
     public Postare getParentPost() {
         return parentPost;
@@ -65,7 +79,7 @@ public class Comentariu implements Likeable {
             return;
         }
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length() - 1));
-        Postare parentPost = Postare.getPostByIdFILE(givenId);
+        Postare parentPost = Postare.getPostByIdARRAYLIST(givenId);
         //4.Comentariul are peste 300 de caractere
         if (extractedText.length() > 300) {
             System.out.println("{ 'status' : 'error', 'message' : 'Comment text length exceeded'}");
@@ -73,17 +87,19 @@ public class Comentariu implements Likeable {
         }
         //5.Totul a mers bine
         Comentariu comentariu = new Comentariu(newUser,extractedText,parentPost);
+        CommentsArray.add(comentariu);
         writeCommentToFile(comentariu, "Comments.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Comment added successfully'}");
     }
 
     public static void writeCommentToFile(Comentariu comentariu, String file) {
-        id++;
+        idCounter++;
         if(FileUtils.isEmptyFile(file))
-            id=1;
+            idCounter=1;
+        comentariu.id = idCounter;
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
-            fileOut.write("USER:" + comentariu.getUsername() + ",POST_ID:" + id + ",COMMENT_ID:" + id + ",COMMENT:" + comentariu.getText() + '\n');
+            fileOut.write("USER:" + comentariu.getUsername() + ",POST_ID:" + comentariu.parentPost.getId() + ",COMMENT_ID:" + comentariu.id + ",COMMENT:" + comentariu.getText() + '\n');
             fileOut.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -114,22 +130,26 @@ public class Comentariu implements Likeable {
         }
         //4. Id not found
         int givenId = Integer.parseInt(args[2].substring(5, args[2].length() - 1));
-        String emptyString = "", foundComment;
-        foundComment = (verifyCommentById(givenId, "Comments.txt"));
-        if (foundComment.equals(emptyString) || !(PermissionToDelete(foundComment, extractedUsername))) {
+        String emptyString = "", foundCommentLine;
+        foundCommentLine = (verifyCommentById(givenId, "Comments.txt"));
+        if (foundCommentLine.equals(emptyString) || !(PermissionToDelete(foundCommentLine, extractedUsername))) {
             System.out.println("{ 'status' : 'error', 'message' : 'The identifier was not valid'}");
             return;
         }
         // 5. succes
-        deleteCommentFromFile(foundComment);
+//      //USER:username,POST_ID:id,COMMENT_ID:id,COMMENT:text
+        deleteCommentFromFile(foundCommentLine);
+        String parts[] = foundCommentLine.split(","); //textul propriu-zis
+        Comentariu foundComment = getCommentById(givenId, "Comments.txt");
+        deleteCommentFromArrayList(foundComment);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
 
     public static boolean PermissionToDelete(String line, String username) {
         //line e USER:user,POST_ID:id,COMMENT_ID:id,COMMENT:text (o linie intreaga din comments)
         String parts[] = line.split(",");
-            if(!(parts[0].substring(5).equals(username)))
-                return false; // permission denied
+        if(!(parts[0].substring(5).equals(username)))
+            return false; // permission denied
         return true;
     }
     public static String verifyCommentById(int givenId, String file) {
@@ -144,12 +164,41 @@ public class Comentariu implements Likeable {
             while ((line = fileIn.readLine()) != null) {
                 String parts[] = line.split(",");
                 if (Integer.parseInt(parts[2].substring(11)) == givenId)
-                        return line;
+                    return line;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return emptyString;
+    }
+    public static void deleteCommentFromArrayList(Comentariu comentariu) {
+        for(Comentariu aux : CommentsArray)
+            if(aux.getUsername().equals(comentariu.getUsername()) && aux.getText().equals(comentariu.getText())) {
+                CommentsArray.remove(aux);
+                return;
+            }
+    }
+    public static Comentariu getCommentById(int givenId, String file) {
+        //empty file
+        if(FileUtils.isEmptyFile(file))
+            return null;
+        try {
+            //USER:user,POST_ID:id,COMMENT_ID:id,COMMENT:text
+            BufferedReader fileIn = new BufferedReader(new FileReader("Comments.txt"));
+            String line;
+            while ((line = fileIn.readLine()) != null) {
+                String parts[] = line.split(",");
+                if (Integer.parseInt(parts[2].substring(11)) == givenId) {
+                    String username = parts[0].substring(5);
+                    Utilizator user = Utilizator.getUserByUsername(username);
+                    Postare post = Postare.getPostByIdARRAYLIST(Integer.parseInt(parts[1].substring(8)));
+                    return new Comentariu(user,parts[3].substring(8),post);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static void deleteCommentFromFile(String text) {
@@ -290,7 +339,7 @@ public class Comentariu implements Likeable {
         //4. Id not found
         int givenId = Integer.parseInt(args[2].substring(13, args[2].length() - 1));
         String emptyString = "", foundComment;
-        foundComment = (verifyCommentById(givenId, "Comments.txt"));
+        foundComment = verifyCommentById(givenId, "Comments.txt");
         if (foundComment.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to unlike was not valid'}");
             return;
@@ -324,6 +373,15 @@ public class Comentariu implements Likeable {
             e.printStackTrace();
         }
     }
+        public static ArrayList<Comentariu> getPostComments(Postare parentPost) {
+            ArrayList <Comentariu> postComments = new ArrayList<>();
+            for(Comentariu comentariu : CommentsArray)
+                if(comentariu.parentPost.equals(parentPost)){
+                    postComments.add(comentariu);
+                }
+            return postComments;
+        }
+
 
 
 }

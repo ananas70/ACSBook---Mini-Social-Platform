@@ -98,6 +98,7 @@ public class App {
         deleteFileContents("Comments.txt");
         deleteFileContents("CommentLikes.txt");
         Postare.PostsArray.clear();
+        Comentariu.CommentsArray.clear();
 
             break;
         default:
