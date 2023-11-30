@@ -75,5 +75,23 @@ public class FileUtils {
         }
 
     }
+    public static void printMostLikedPosts(ArrayList<Postare> PostsArray) {
+        //formats as requested in tests
+        for(Postare postare : PostsArray){
+            System.out.print("{'post_id' : '"+postare.getId()+"','post_text' : '"+postare.getText()+"', 'post_date' : '"+ dateFormat.format(postare.getTimestamp()) + "', 'username' : '"+postare.getUsername()+"', 'number_of_likes' : '"+postare.getLikes()+"' }");
+            if(!(PostsArray.indexOf(postare) == PostsArray.size()-1))
+                System.out.print(",");
+        }
+    }
+
+    public static void printMostCommentedPosts(ArrayList<Postare> PostsArray) {
+        //formats as requested in tests
+
+        for(Postare postare : PostsArray){
+            System.out.print("{'post_id' : '"+postare.getId()+"','post_text' : '"+postare.getText()+"', 'post_date' : '"+ dateFormat.format(postare.getTimestamp()) + "', 'username' : '"+postare.getUsername()+"', 'number_of_comments' : '"+postare.getCommentsCounter()+"' }");
+            if(!(PostsArray.indexOf(postare) == PostsArray.size()-1))
+                System.out.print(",");
+        }
+    }
 
 }

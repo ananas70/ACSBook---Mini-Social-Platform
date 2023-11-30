@@ -80,6 +80,10 @@ public class Comentariu implements Likeable {
         }
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length() - 1));
         Postare parentPost = Postare.getPostByIdARRAYLIST(givenId);
+        if(parentPost == null) {
+            System.out.println("Eroare la cautarea postarii in baza de date");
+            System.exit(1);
+        }
         //4.Comentariul are peste 300 de caractere
         if (extractedText.length() > 300) {
             System.out.println("{ 'status' : 'error', 'message' : 'Comment text length exceeded'}");
@@ -88,6 +92,7 @@ public class Comentariu implements Likeable {
         //5.Totul a mers bine
         Comentariu comentariu = new Comentariu(newUser,extractedText,parentPost);
         CommentsArray.add(comentariu);
+        parentPost.incrementCommentsCounter();
         writeCommentToFile(comentariu, "Comments.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Comment added successfully'}");
     }
@@ -373,14 +378,14 @@ public class Comentariu implements Likeable {
             e.printStackTrace();
         }
     }
-        public static ArrayList<Comentariu> getPostComments(Postare parentPost) {
-            ArrayList <Comentariu> postComments = new ArrayList<>();
-            for(Comentariu comentariu : CommentsArray)
-                if(comentariu.parentPost.equals(parentPost)){
-                    postComments.add(comentariu);
-                }
-            return postComments;
-        }
+    public static ArrayList<Comentariu> getPostComments(Postare parentPost) {
+        ArrayList <Comentariu> postComments = new ArrayList<>();
+        for(Comentariu comentariu : CommentsArray)
+            if(comentariu.parentPost.equals(parentPost)){
+                postComments.add(comentariu);
+            }
+        return postComments;
+    }
 
 
 

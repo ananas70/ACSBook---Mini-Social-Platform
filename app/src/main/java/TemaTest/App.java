@@ -79,10 +79,10 @@ public class App {
 
             break;
         case "-get-most-liked-posts":
-
+            Postare.getMostLikedPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-most-commented-posts":
-
+            Postare.getMostCommentedPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-most-followed-users":
 

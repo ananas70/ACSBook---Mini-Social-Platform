@@ -8,7 +8,7 @@ import java.util.*;
 public class Postare implements Likeable {
     private Utilizator user;
     private String text;
-    private int likes, id;
+    private int likes, id, commentsCounter;
     private Date timestamp;
     private static int idCounter = 0;
     static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
@@ -22,6 +22,7 @@ public class Postare implements Likeable {
         this.text = text;
         this.likes = 0;
         this.timestamp = new Date();
+        this.commentsCounter = 0;
     }
 
     public int getId() {
@@ -42,6 +43,18 @@ public class Postare implements Likeable {
 
     public Date getTimestamp() {
         return timestamp;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public int getCommentsCounter() {
+        return commentsCounter;
+    }
+
+    public void incrementCommentsCounter() {
+        this.commentsCounter++;
     }
 
     public static void createSystemPost(java.lang.String[] args) {
@@ -252,9 +265,9 @@ public class Postare implements Likeable {
         //4. Post Id not found
         String extractedId = args[2].substring(10, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
-        String emptyString = "", foundPost;
-        foundPost = (verifyPostById(givenId, "Posts.txt"));
-        if (foundPost.equals(emptyString)) {
+        String emptyString = "", foundPostLine;
+        foundPostLine = (verifyPostById(givenId, "Posts.txt"));
+        if (foundPostLine.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
@@ -268,7 +281,13 @@ public class Postare implements Likeable {
             return;
         }
         //Totul a mers bine
-        this.likes++;
+//        this.likes++;
+        Postare foundPost = getPostByIdARRAYLIST(givenId);
+        if(foundPost == null) {
+            System.out.println("Eroare la cautarea postarii in baza de date");
+            System.exit(1);
+        }
+        foundPost.likes++;
         writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
@@ -350,9 +369,9 @@ public class Postare implements Likeable {
         //4. Post Id not found
         String extractedId = args[2].substring(10, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
-        String emptyString = "", foundPost;
-        foundPost = (verifyPostById(givenId, "Posts.txt"));
-        if (foundPost.equals(emptyString)) {
+        String emptyString = "", foundPostLine;
+        foundPostLine = (verifyPostById(givenId, "Posts.txt"));
+        if (foundPostLine.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to unlike was not valid'}");
             return;
         }
@@ -362,7 +381,13 @@ public class Postare implements Likeable {
             return;
         }
         //Totul a mers bine
-        this.likes--;
+//        this.likes--;
+        Postare foundPost = getPostByIdARRAYLIST(givenId);
+        if(foundPost == null) {
+            System.out.println("Eroare la cautarea postarii in baza de date");
+            System.exit(1);
+        }
+        foundPost.likes--;
         unlikePostFromFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
@@ -487,4 +512,53 @@ public class Postare implements Likeable {
         System.out.print("] }] }");
     }
 
+    public static void getMostLikedPosts(String[] args) {
+        //"-u 'test'", "-p 'test'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
+
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Totul a mers bine
+        ArrayList <Postare> mostLikedPosts = PostsArray;
+        Collections.sort(mostLikedPosts, Comparator.comparingInt(Postare::getLikes).reversed());
+        System.out.print("{ 'status' : 'ok', 'message' : [");
+        FileUtils.printMostLikedPosts(mostLikedPosts);
+        System.out.println(" ]}");
+    }
+
+    public static void getMostCommentedPosts(String[] args) {
+        //"-u 'test'", "-p 'test'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
+
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Totul a mers bine
+        ArrayList <Postare> mostCommentedPosts = PostsArray;
+        Collections.sort(mostCommentedPosts, Comparator.comparingInt(Postare::getCommentsCounter).reversed());
+        System.out.print("{ 'status' : 'ok', 'message' : [");
+        FileUtils.printMostCommentedPosts(mostCommentedPosts);
+        System.out.println("]}");
+    }
 }
