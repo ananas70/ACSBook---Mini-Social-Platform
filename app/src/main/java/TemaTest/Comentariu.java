@@ -202,20 +202,20 @@ public class Comentariu implements Likeable {
             return;
         }
         //Comentariul de apreciat nu este corect (sau acest comenatriu este deja apreciat, sau este al utilizatorului curent)
-//        if (verifyUserLikesHisComment(extractedUsername, givenId, "Comments.txt")) {
-//            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
-//            return;
-//        }
+        if (verifyUserLikesHisComment(extractedUsername, givenId, "Comments.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
+            return;
+        }
         if (verifyCommentAlreadyLiked(extractedUsername, givenId, "CommentLikes.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
             return;
         }
         //Totul a mers bine
         this.likes++;
+
         writeCommentLikeToFile(extractedUsername, givenId, "CommentLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-
     public static boolean verifyUserLikesHisComment(String userLikes, int givenId, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
@@ -266,6 +266,64 @@ public class Comentariu implements Likeable {
 
     @Override
     public void unlike(String[] args) {
+        //"-like-comment", "-u 'test'", "-p 'test'", "-comment-id '1'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
 
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Comment Id not provided
+        if (args.length < 3) {
+            System.out.println("{ 'status' : 'error', 'message' : 'No comment identifier to unlike was provided'}");
+            return;
+        }
+        //4. Id not found
+        int givenId = Integer.parseInt(args[2].substring(13, args[2].length() - 1));
+        String emptyString = "", foundComment;
+        foundComment = (verifyCommentById(givenId, "Comments.txt"));
+        if (foundComment.equals(emptyString)) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to unlike was not valid'}");
+            return;
+        }
+        //Comentariul de unlike nu este corect (sau acest comenatriu este deja unliked)
+        if (!verifyCommentAlreadyLiked(extractedUsername, givenId, "CommentLikes.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to unlike was not valid'}");
+            return;
+        }
+        //Totul a mers bine
+        this.likes--;
+        unlikeCommentFromFile(extractedUsername, givenId);
+        System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
+
+    private static void unlikeCommentFromFile(String userLikes, int givenId) {
+        File inputFile = new File("CommentLikes.txt");
+        File temporaryFile = new File("TempFile.txt");
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
+            String line;
+            while ((line = reader.readLine()) != null){
+                //"userLIKESid"
+                String[] parts = line.split("LIKES");
+                if ((parts[0].equals(userLikes) && Integer.parseInt(parts[1]) == givenId))
+                    writer.write(line + "\n");
+            }
+            FileUtils.copyFile("TempFile.txt", "CommentLikes.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 }

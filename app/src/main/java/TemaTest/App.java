@@ -53,6 +53,10 @@ public class App {
             Comentariu comentariu = new Comentariu();
             comentariu.like(Arrays.copyOfRange(strings,1,strings.length));
             break;
+        case "-unlike-comment":
+            comentariu = new Comentariu();
+            comentariu.unlike(Arrays.copyOfRange(strings,1,strings.length));
+            break;
         case "-get-followings-posts":
 
             break;
