@@ -69,7 +69,7 @@ public class Comentariu implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -124,7 +124,7 @@ public class Comentariu implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -195,7 +195,7 @@ public class Comentariu implements Likeable {
                 String parts[] = line.split(",");
                 if (Integer.parseInt(parts[2].substring(11)) == givenId) {
                     String username = parts[0].substring(5);
-                    Utilizator user = Utilizator.getUserByUsername(username);
+                    Utilizator user = Utilizator.getUserByUsernameFILE(username);
                     Postare post = Postare.getPostByIdARRAYLIST(Integer.parseInt(parts[1].substring(8)));
                     return new Comentariu(user,parts[3].substring(8),post);
                 }
@@ -238,7 +238,7 @@ public class Comentariu implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -249,9 +249,9 @@ public class Comentariu implements Likeable {
         }
         //4. Id not found
         int givenId = Integer.parseInt(args[2].substring(13, args[2].length() - 1));
-        String emptyString = "", foundComment;
-        foundComment = (verifyCommentById(givenId, "Comments.txt"));
-        if (foundComment.equals(emptyString)) {
+        String emptyString = "", foundCommentLine;
+        foundCommentLine = (verifyCommentById(givenId, "Comments.txt"));
+        if (foundCommentLine.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to like was not valid'}");
             return;
         }
@@ -265,8 +265,13 @@ public class Comentariu implements Likeable {
             return;
         }
         //Totul a mers bine
-        this.likes++;
-
+        Comentariu foundComment = getCommentById(givenId, "Comments.txt");
+        if(foundComment == null) {
+            System.out.println("Eroare la cautarea comentariului in baza de date");
+            System.exit(1);
+        }
+        foundComment.likes++;
+        incrementUserLikes(foundComment);
         writeCommentLikeToFile(extractedUsername, givenId, "CommentLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
@@ -316,8 +321,6 @@ public class Comentariu implements Likeable {
         }
         return false;
     }
-
-
     @Override
     public void unlike(String[] args) {
         //"-like-comment", "-u 'test'", "-p 'test'", "-comment-id '1'"
@@ -332,7 +335,7 @@ public class Comentariu implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -343,9 +346,9 @@ public class Comentariu implements Likeable {
         }
         //4. Id not found
         int givenId = Integer.parseInt(args[2].substring(13, args[2].length() - 1));
-        String emptyString = "", foundComment;
-        foundComment = verifyCommentById(givenId, "Comments.txt");
-        if (foundComment.equals(emptyString)) {
+        String emptyString = "", foundCommentLine;
+        foundCommentLine = verifyCommentById(givenId, "Comments.txt");
+        if (foundCommentLine.equals(emptyString)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The comment identifier to unlike was not valid'}");
             return;
         }
@@ -355,11 +358,16 @@ public class Comentariu implements Likeable {
             return;
         }
         //Totul a mers bine
-        this.likes--;
+        Comentariu foundComment = getCommentById(givenId, "Comments.txt");
+        if(foundComment == null) {
+            System.out.println("Eroare la cautarea comentariului in baza de date");
+            System.exit(1);
+        }
+        foundComment.likes++;
+        decrementUserLikes(foundComment);
         unlikeCommentFromFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-
     private static void unlikeCommentFromFile(String userLikes, int givenId) {
         File inputFile = new File("CommentLikes.txt");
         File temporaryFile = new File("TempFile.txt");
@@ -385,6 +393,16 @@ public class Comentariu implements Likeable {
                 postComments.add(comentariu);
             }
         return postComments;
+    }
+    public static void incrementUserLikes(Comentariu foundComment) {
+        for(Utilizator utilizator : Utilizator.UsersArray)
+            if(utilizator.getUsername().equals(foundComment.user.getUsername()) && utilizator.getParola().equals(foundComment.user.getParola()))
+                utilizator.incrementLikes();
+    }
+    public static void decrementUserLikes(Comentariu foundComment) {
+        for(Utilizator utilizator : Utilizator.UsersArray)
+            if(utilizator.getUsername().equals(foundComment.user.getUsername()) && utilizator.getParola().equals(foundComment.user.getParola()))
+                utilizator.decrementLikes();
     }
 
 

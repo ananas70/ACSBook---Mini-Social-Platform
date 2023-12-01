@@ -3,7 +3,6 @@
  */
 package TemaTest;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
@@ -58,7 +57,7 @@ public class App {
             comentariu.unlike(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-followings-posts":
-
+            Postare.getFollowingsPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-user-posts":
             Postare.getUserPosts(Arrays.copyOfRange(strings,1,strings.length));
@@ -73,10 +72,10 @@ public class App {
             Comentariu.deleteCommentById(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-following":
-
+            Utilizator.getFollowing(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-followers":
-
+            Utilizator.getFollowers(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-most-liked-posts":
             Postare.getMostLikedPosts(Arrays.copyOfRange(strings,1,strings.length));
@@ -85,10 +84,10 @@ public class App {
             Postare.getMostCommentedPosts(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-most-followed-users":
-
+            Utilizator.getMostFollowedUsers(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-most-liked-users":
-
+            Utilizator.getMostLikedUsers(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-cleanup-all":
         deleteFileContents("Users.txt");
@@ -99,10 +98,10 @@ public class App {
         deleteFileContents("CommentLikes.txt");
         Postare.PostsArray.clear();
         Comentariu.CommentsArray.clear();
-
+        Utilizator.UsersArray.clear();
             break;
         default:
-            System.out.println("Comanda necunoscuta eeh");
+            System.out.println("Comanda necunoscuta");
     }
 
 
@@ -112,7 +111,11 @@ public class App {
     public App() {/* compiled code */}
 
     public static void main(java.lang.String[] strings) {
-    processCommandLineArgs(strings);
+
+        if(strings == null)
+            System.out.println("Hello world!");
+        else
+            processCommandLineArgs(strings);
 
     }
 }

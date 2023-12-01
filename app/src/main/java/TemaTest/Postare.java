@@ -32,6 +32,9 @@ public class Postare implements Likeable {
     public String getUsername() {
         return user.getUsername();
     }
+    public Utilizator getUser() {
+        return user;
+    }
 
     public String getparola() {
         return user.getParola();
@@ -76,7 +79,7 @@ public class Postare implements Likeable {
 
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -112,7 +115,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -206,7 +209,7 @@ public class Postare implements Likeable {
                 int foundId = Integer.parseInt(parts[1].substring(3));
                 if(givenId == foundId) {
                     String username = parts[0].substring(5);
-                    Utilizator user = Utilizator.getUserByUsername(username);
+                    Utilizator user = Utilizator.getUserByUsernameFILE(username);
                     if(user == null)
                     {
                         System.out.println("Eroare la gasirea utilizatorului in baza de date");
@@ -253,7 +256,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsARRAY(newUser)) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -288,11 +291,24 @@ public class Postare implements Likeable {
             System.exit(1);
         }
         foundPost.likes++;
+//        foundPost.user.incrementLikes(); DE CE NU MERGE? PENTRU CA NU E REFERINTA ALUIA BRE
+        incrementUserLikes(foundPost);
         writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
     }
 
+    public static void incrementUserLikes(Postare foundPost) {
+        for(Utilizator utilizator : Utilizator.UsersArray)
+            if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
+                utilizator.incrementLikes();
+    }
+
+    public static void decrementUserLikes(Postare foundPost) {
+        for(Utilizator utilizator : Utilizator.UsersArray)
+            if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
+                utilizator.decrementLikes();
+    }
     public static boolean verifyUserLikesHisPost(String userLikes, int givenId, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
@@ -357,7 +373,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -381,13 +397,13 @@ public class Postare implements Likeable {
             return;
         }
         //Totul a mers bine
-//        this.likes--;
         Postare foundPost = getPostByIdARRAYLIST(givenId);
         if(foundPost == null) {
             System.out.println("Eroare la cautarea postarii in baza de date");
             System.exit(1);
         }
         foundPost.likes--;
+        decrementUserLikes(foundPost);
         unlikePostFromFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
@@ -424,7 +440,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -435,7 +451,7 @@ public class Postare implements Likeable {
         }
         //4. Username-ul pentru listare postări nu este corect (sau acest username este deja unfollowed)
         String followedUser = args[2].substring(11, args[2].length()-1);
-        if(!Utilizator.verifyUserByUsername(followedUser, "Users.txt")) {
+        if(!Utilizator.verifyUserByUsernameFILE(followedUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
             return;
         }
@@ -471,7 +487,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -525,7 +541,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -550,7 +566,7 @@ public class Postare implements Likeable {
         Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
         //2. Username nu există, sau username și parola sunt greșite
 
-        if (!Utilizator.verifyUserByCredentials(newUser, "Users.txt")) {
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
             return;
         }
@@ -561,4 +577,39 @@ public class Postare implements Likeable {
         FileUtils.printMostCommentedPosts(mostCommentedPosts);
         System.out.println("]}");
     }
+
+    public static void getFollowingsPosts(java.lang.String[] args){
+        //"-u 'test'", "-p 'test'"
+        //1. Paramentrii -u sau -p lipsa
+        if (args.length == 0 || args.length == 1) {
+            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+            return;
+        }
+        String extractedUsername = args[0].substring(4, args[0].length() - 1);
+        String extractedParola = args[1].substring(4, args[1].length() - 1);
+
+        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
+        //2. Username nu există, sau username și parola sunt greșite
+
+        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
+            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+            return;
+        }
+        //3. Totul a mers bine
+        //bagam toate postarile intr-un alt ArrayList
+        ArrayList<Postare> followingsPosts = new ArrayList<>();
+        for(Postare post : PostsArray) {
+            if(Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt"))
+                followingsPosts.add(post);
+        }
+        //sortare yayy
+        Collections.sort(followingsPosts, Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
+        //afisare yayy
+        System.out.print("{'status' : 'ok', 'message' :" + " [");
+
+        FileUtils.printFollowingsPosts(followingsPosts);
+        System.out.print("]}");
+    }
+
+
 }

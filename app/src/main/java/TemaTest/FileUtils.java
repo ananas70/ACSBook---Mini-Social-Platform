@@ -94,4 +94,50 @@ public class FileUtils {
         }
     }
 
+    public static void printMostLikedUsers(ArrayList<Utilizator> UsersArray) {
+        //formats as requested in tests
+        //{'username' : 'test2','number_of_likes' : '3' }
+        boolean isFirst = true;
+        for(Utilizator utilizator : UsersArray){
+            if(!isFirst && utilizator.getLikes()!=0)
+                System.out.print(",");
+            if(!(utilizator.getLikes() == 0))
+             System.out.print("{'username' : '"+utilizator.getUsername()+"','number_of_likes' : '"+utilizator.getLikes()+"' }");
+            isFirst = false;
+        }
+    }
+
+    public static void printMostFollowedUsers(ArrayList<Utilizator> UsersArray) {
+        //formats as requested in tests
+        boolean isFirst = true;
+        for(Utilizator utilizator : UsersArray){
+            if(!isFirst && utilizator.getUserFollowers()!=0)
+                System.out.print(",");
+            if(!(utilizator.getUserFollowers() == 0))
+                System.out.print("{'username' : '"+utilizator.getUsername()+"','number_of_followers' : ' "+utilizator.getUserFollowers()+"' }");
+            isFirst = false;
+        }
+    }
+
+    public static void printFollowingsPosts(ArrayList<Postare> PostsArray) {
+        //formats as requested in tests
+        for(Postare postare : PostsArray){
+            System.out.print("{'post_id' : '"+postare.getId()+"','post_text' : '"+postare.getText()+"', 'post_date' : '"+ dateFormat.format(postare.getTimestamp()) + "', 'username' : '"+postare.getUsername()+"' }");
+            if(!(PostsArray.indexOf(postare) == PostsArray.size()-1))
+                System.out.print(",");
+        }
+    }
+
+    public static void printFollowingUsers(ArrayList<Utilizator> UsersArray) {
+        //formats as requested in tests
+
+        for(Utilizator utilizator : UsersArray){
+            System.out.print("'"+utilizator.getUsername()+"'");
+            if(!(UsersArray.indexOf(utilizator) == UsersArray.size()-1))
+                System.out.print(",");
+            else System.out.print(" ");
+        }
+    }
+
+
 }
