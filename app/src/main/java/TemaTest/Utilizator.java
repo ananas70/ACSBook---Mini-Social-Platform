@@ -41,11 +41,9 @@ public class Utilizator {
     public void decrementFollowers() {
         this.followers--;
     }
-
-
     @Override
     public String toString() {
-        return this.username; // Pt ca altfel afisa Utilizator@352ff4da
+        return this.username;
     }
 
     public static void createSystemUser(java.lang.String[] args) {
@@ -79,7 +77,7 @@ public class Utilizator {
     public static Utilizator createUser (String username, String parola) {
         return new Utilizator(username, parola);
     }
-    public static void writeUserToFile(Utilizator User, String file) {
+    private static void writeUserToFile(Utilizator User, String file) {
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
             fileOut.write(User.username + "," + User.parola + "\n");
@@ -88,7 +86,7 @@ public class Utilizator {
             e.printStackTrace();
         }
     }
-    public static void writeFollowersToFile(String usFollows, String usFollowed, String file) {
+    private static void writeFollowersToFile(String usFollows, String usFollowed, String file) {
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
             fileOut.write(usFollows + "FOLLOWS" + usFollowed + "\n");
@@ -114,15 +112,6 @@ public class Utilizator {
         }
         return false;
     }
-    public static boolean verifyUserByUsernameARRAY(String Username) {
-        if(UsersArray.isEmpty())
-            return false;
-        for(Utilizator utilizator : UsersArray)
-            if(utilizator.username.equals(Username))
-                return true;
-        return false;
-    }
-
     public static Utilizator getUserByUsernameFILE(String Username) {
         if(FileUtils.isEmptyFile("Users.txt"))
             return null;
@@ -139,7 +128,7 @@ public class Utilizator {
         }
         return null;
     }
-    public static Utilizator getUserByUsernameARRAY(String Username) {
+    private static Utilizator getUserByUsernameARRAY(String Username) {
         if(UsersArray.isEmpty())
             return null;
         for(Utilizator utilizator : UsersArray)
@@ -147,7 +136,6 @@ public class Utilizator {
                 return utilizator;
         return null;
     }
-
     public static boolean verifyUserByCredentialsFILE(Utilizator User, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
@@ -165,7 +153,6 @@ public class Utilizator {
         }
         return false;
     }
-
     public static boolean verifyUserByCredentialsARRAY(Utilizator User) {
         if(UsersArray.isEmpty())
             return false;
@@ -216,7 +203,6 @@ public class Utilizator {
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
     }
-
     public static void unfollowUserByUsername(java.lang.String[] args) {
         //"-unfollow-user-by-username", "-u 'test'", "-p 'test'", "-username 'test2'"
         //1. -u, -p nu este furnizat
@@ -258,8 +244,7 @@ public class Utilizator {
         foundUser.decrementFollowers();
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-
-    public static void deleteFollower(String usFollows, String usFollowed) {
+    private static void deleteFollower(String usFollows, String usFollowed) {
         File inputFile = new File("Followers.txt");
         File temporaryFile = new File("TempFile.txt");
         try{
@@ -277,7 +262,6 @@ public class Utilizator {
             e.printStackTrace();
         }
     }
-
     public static boolean verifyAlreadyFollowed(String usFollows, String usFollowed, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
@@ -294,7 +278,6 @@ public class Utilizator {
         }
         return false;
     }
-
     public static void getMostLikedUsers(String[] args) {
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -319,7 +302,6 @@ public class Utilizator {
         FileUtils.printMostLikedUsers(mostLikedUsers);
         System.out.println("]}");
     }
-
     public static void getFollowing (String[] args) {
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -347,7 +329,7 @@ public class Utilizator {
         FileUtils.printFollowingUsers(following);
         System.out.println("]}");
     }
-    public static ArrayList<Utilizator> getFollowingArray(String username, String file) {
+    private static ArrayList<Utilizator> getFollowingArray(String username, String file) {
         ArrayList<Utilizator> following = new ArrayList<>();
         if(FileUtils.isEmptyFile(file))
             return null;
@@ -366,7 +348,6 @@ public class Utilizator {
         }
         return following;
     }
-
     public static void getFollowers (String[] args) {
         //"-u 'test'", "-p 'test'", "-username 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -425,7 +406,6 @@ public class Utilizator {
         }
         return followers;
     }
-
     public static void getMostFollowedUsers(String[] args) {
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa

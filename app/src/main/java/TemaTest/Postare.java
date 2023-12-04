@@ -1,9 +1,7 @@
 package TemaTest;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
-
 
 public class Postare implements Likeable {
     private Utilizator user;
@@ -11,11 +9,9 @@ public class Postare implements Likeable {
     private int likes, id, commentsCounter;
     private Date timestamp;
     private static int idCounter = 0;
-    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
     static ArrayList<Postare> PostsArray = new ArrayList<>();
 
-    public Postare() {
-    }
+    public Postare() {}
 
     public Postare(Utilizator user, String text) {
         this.user = user;
@@ -31,13 +27,6 @@ public class Postare implements Likeable {
 
     public String getUsername() {
         return user.getUsername();
-    }
-    public Utilizator getUser() {
-        return user;
-    }
-
-    public String getparola() {
-        return user.getParola();
     }
 
     public String getText() {
@@ -55,11 +44,9 @@ public class Postare implements Likeable {
     public int getCommentsCounter() {
         return commentsCounter;
     }
-
     public void incrementCommentsCounter() {
         this.commentsCounter++;
     }
-
     public static void createSystemPost(java.lang.String[] args) {
         //"-u 'test'", "-p 'test'", "-text 'Astazi ma simt bine'"
         //1. Paramentrii -u sau -p lipsa
@@ -101,7 +88,6 @@ public class Postare implements Likeable {
 //        FileUtils.printArrayList(PostsArray);
         System.out.println("{ 'status' : 'ok', 'message' : 'Post added successfully'}");
     }
-
     public static void deletePostById(java.lang.String[] args) {
         //"-u 'test'", "-p 'test'", "-id '1'"
         //1. Paramentrii -u sau -p lipsa
@@ -135,20 +121,18 @@ public class Postare implements Likeable {
         }
         // 5. succes
         deletePostFromFile(foundPost);
-        String parts[] = foundPost.split(","); //textul propriu-zis
+        String[] parts = foundPost.split(","); //textul propriu-zis
         Postare postare = new Postare(newUser,parts[2].substring(5));
         deletePostFromArrayList(postare);
         System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
     }
-
-  public static void deletePostFromArrayList(Postare postare) {
+    public static void deletePostFromArrayList(Postare postare) {
         for(Postare aux : PostsArray)
             if(aux.getUsername().equals(postare.getUsername()) && aux.getText().equals(postare.getText())) {
                 PostsArray.remove(aux);
                 return;
             }
   }
-
     public static void writePostToFile(Postare postare, String file) {
         //empty file - reset id
         idCounter++;
@@ -163,7 +147,6 @@ public class Postare implements Likeable {
             e.printStackTrace();
         }
     }
-
     public static String verifyPostById(int givenId, String file) {
         String emptyString = "";
         //empty file
@@ -174,7 +157,7 @@ public class Postare implements Likeable {
             BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
             String line;
             while ((line = fileIn.readLine()) != null && givenId > 0) {
-               String parts[] = line.split(",");
+               String[] parts = line.split(",");
                 if (Integer.parseInt(parts[1].substring(3)) == givenId)
                     return line;
             }
@@ -183,7 +166,6 @@ public class Postare implements Likeable {
         }
         return emptyString;
     }
-
     public static Postare getPostByIdARRAYLIST(int givenId) {
         if(PostsArray == null){
             System.out.println("Eroare la accesarea PostsArray");
@@ -192,36 +174,6 @@ public class Postare implements Likeable {
         for(Postare post : PostsArray)
             if(post.getId() == givenId)
                 return post;
-        return null;
-    }
-
-
-    public static Postare getPostByIdFILE(int givenId) {
-        //empty file
-        if(FileUtils.isEmptyFile("Posts.txt"))
-            return null;
-        try {
-            //"USER:username,ID:id,POST:postare
-            BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
-            String line;
-            while ((line = fileIn.readLine()) != null && givenId > 0) {
-                String[] parts = line.split(",");
-                int foundId = Integer.parseInt(parts[1].substring(3));
-                if(givenId == foundId) {
-                    String username = parts[0].substring(5);
-                    Utilizator user = Utilizator.getUserByUsernameFILE(username);
-                    if(user == null)
-                    {
-                        System.out.println("Eroare la gasirea utilizatorului in baza de date");
-                        System.exit(1);
-                    }
-                    String text = parts[2].substring(5);
-                    return new Postare(user, text);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return null;
     }
     public static void deletePostFromFile(String text) {
@@ -275,45 +227,42 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea de apreciat nu este corectă (sau această postare este deja apreciată, sau este a utilizatorului curent)
-        if(verifyUserLikesHisPost(extractedUsername, givenId, "Posts.txt")){
+        if(verifyUserLikesHisPost(extractedUsername, givenId)){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
-        if (verifyPostAlreadyLiked(extractedUsername, givenId, "PostLikes.txt")) {
+        if (verifyPostAlreadyLiked(extractedUsername, givenId)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
         //Totul a mers bine
-//        this.likes++;
         Postare foundPost = getPostByIdARRAYLIST(givenId);
         if(foundPost == null) {
             System.out.println("Eroare la cautarea postarii in baza de date");
             System.exit(1);
         }
         foundPost.likes++;
-//        foundPost.user.incrementLikes(); DE CE NU MERGE? PENTRU CA NU E REFERINTA ALUIA BRE
+
         incrementUserLikes(foundPost);
-        writePostLikeToFile(extractedUsername, givenId, "PostLikes.txt");
+        writePostLikeToFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
     }
-
-    public static void incrementUserLikes(Postare foundPost) {
+    private static void incrementUserLikes(Postare foundPost) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
                 utilizator.incrementLikes();
     }
-
-    public static void decrementUserLikes(Postare foundPost) {
+    private static void decrementUserLikes(Postare foundPost) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
                 utilizator.decrementLikes();
     }
-    public static boolean verifyUserLikesHisPost(String userLikes, int givenId, String file) {
-        if(FileUtils.isEmptyFile(file))
+    private static boolean verifyUserLikesHisPost(String userLikes, int givenId) {
+        if(FileUtils.isEmptyFile("Posts.txt"))
             return false;
         try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            BufferedReader fileIn = new BufferedReader(new FileReader("Posts.txt"));
             String line;
             while ((line = fileIn.readLine()) != null) {
                 //"USER:user,ID:id,POST:post"
@@ -329,12 +278,11 @@ public class Postare implements Likeable {
         }
         return false;
     }
-
-    public static boolean verifyPostAlreadyLiked(String userLikes, int givenId, String file) {
-        if(FileUtils.isEmptyFile(file))
+    private static boolean verifyPostAlreadyLiked(String userLikes, int givenId) {
+        if(FileUtils.isEmptyFile("PostLikes.txt"))
             return false;
         try {
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
+            BufferedReader fileIn = new BufferedReader(new FileReader("PostLikes.txt"));
             String line;
             while ((line = fileIn.readLine()) != null) {
                 //testLIKES1
@@ -348,17 +296,15 @@ public class Postare implements Likeable {
         }
         return false;
     }
-
-    public static void writePostLikeToFile(String userLikes, int givenId, String file) {
+    private static void writePostLikeToFile(String userLikes, int givenId) {
         try {
-            BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter("PostLikes.txt", true));
             fileOut.write(userLikes + "LIKES" + givenId + "\n");
             fileOut.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     @Override
     public void unlike(String[] args) {
         //"-u 'test'", "-p 'test'", "-post-id '1'"
@@ -392,7 +338,7 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea pentru unlike nu este corecta (sau această postare este deja unliked)
-        if (!verifyPostAlreadyLiked(extractedUsername, givenId, "PostLikes.txt")) {
+        if (!verifyPostAlreadyLiked(extractedUsername, givenId)) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to unlike was not valid'}");
             return;
         }
@@ -407,7 +353,6 @@ public class Postare implements Likeable {
         unlikePostFromFile(extractedUsername, givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-
     private static void unlikePostFromFile(String userLikes, int givenId) {
         File inputFile = new File("PostLikes.txt");
         File temporaryFile = new File("TempFile.txt");
@@ -426,7 +371,6 @@ public class Postare implements Likeable {
             e.printStackTrace();
         }
     }
-
     public static void getUserPosts(java.lang.String[] args){
         //"-u 'test'", "-p 'test'", "-username 'test2'"
         //1. Paramentrii -u sau -p lipsa
@@ -467,13 +411,12 @@ public class Postare implements Likeable {
                 userPosts.add(post);
         }
         //sortare yayy
-        Collections.sort(userPosts, Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
+        userPosts.sort(Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
         //afisare yayy
         System.out.print("{'status' : 'ok', 'message' :" + " [");
         FileUtils.printPostDetails(userPosts);
         System.out.print("]}");
     }
-
     public static void getPostDetails(java.lang.String[] args){
         //"-u 'test'", "-p 'test'", "-post-id '1'"
         //1. Paramentrii -u sau -p lipsa
@@ -498,11 +441,6 @@ public class Postare implements Likeable {
         }
         //4. Identificatorul pentru postare nu este corect (sau acest username este deja unfollowed)
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length()-1));
-//        String emptyString = "";
-//        if(verifyPostById(givenId, "Posts.txt").equals(emptyString)){
-//            System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
-//            return;
-//        }
 
         Postare post = new Postare();
         post = getPostByIdARRAYLIST(givenId);
@@ -517,17 +455,15 @@ public class Postare implements Likeable {
             return;
         }
         //5. Totul a mers bine
-        System.out.print("{'status' : 'ok', 'message' : [{'post_text' : '"+post.text+"', 'post_date' :'" + dateFormat.format(post.timestamp) + "', 'username' : '"+post.user+"', 'number_of_likes' :" +" '"+post.likes+"', ");
-//       System.out.print("'comments' : [{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}] }] }");
-        //ne trebuie un array cu comentariile
+        System.out.print("{'status' : 'ok', 'message' : [{'post_text' : '"+post.text+"', 'post_date' :'" + FileUtils.dateFormat.format(post.timestamp) + "', 'username' : '"+post.user+"', 'number_of_likes' :" +" '"+post.likes+"', ");
+        //ne trebuie un ArrayList cu comentariile
         ArrayList <Comentariu> postComments = Comentariu.getPostComments(post);
-        //sortare yayy
-        Collections.sort(postComments, Collections.reverseOrder(Comparator.comparing(Comentariu::getTimestamp)));
-        //afisare yayy
+        //sortare
+        postComments.sort(Collections.reverseOrder(Comparator.comparing(Comentariu::getTimestamp)));
+        //afisare
         FileUtils.printPostComments(postComments);
         System.out.print("] }] }");
     }
-
     public static void getMostLikedPosts(String[] args) {
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -547,12 +483,11 @@ public class Postare implements Likeable {
         }
         //3. Totul a mers bine
         ArrayList <Postare> mostLikedPosts = PostsArray;
-        Collections.sort(mostLikedPosts, Comparator.comparingInt(Postare::getLikes).reversed());
+        mostLikedPosts.sort(Comparator.comparingInt(Postare::getLikes).reversed());
         System.out.print("{ 'status' : 'ok', 'message' : [");
         FileUtils.printMostLikedPosts(mostLikedPosts);
         System.out.println(" ]}");
     }
-
     public static void getMostCommentedPosts(String[] args) {
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -572,12 +507,11 @@ public class Postare implements Likeable {
         }
         //3. Totul a mers bine
         ArrayList <Postare> mostCommentedPosts = PostsArray;
-        Collections.sort(mostCommentedPosts, Comparator.comparingInt(Postare::getCommentsCounter).reversed());
+        mostCommentedPosts.sort(Comparator.comparingInt(Postare::getCommentsCounter).reversed());
         System.out.print("{ 'status' : 'ok', 'message' : [");
         FileUtils.printMostCommentedPosts(mostCommentedPosts);
         System.out.println("]}");
     }
-
     public static void getFollowingsPosts(java.lang.String[] args){
         //"-u 'test'", "-p 'test'"
         //1. Paramentrii -u sau -p lipsa
@@ -596,20 +530,19 @@ public class Postare implements Likeable {
             return;
         }
         //3. Totul a mers bine
-        //bagam toate postarile intr-un alt ArrayList
+        //Adaugam toate postarile intr-un alt ArrayList
         ArrayList<Postare> followingsPosts = new ArrayList<>();
         for(Postare post : PostsArray) {
             if(Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt"))
                 followingsPosts.add(post);
         }
-        //sortare yayy
-        Collections.sort(followingsPosts, Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
-        //afisare yayy
+        //sortare
+        followingsPosts.sort(Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
+        //afisare
         System.out.print("{'status' : 'ok', 'message' :" + " [");
 
         FileUtils.printFollowingsPosts(followingsPosts);
         System.out.print("]}");
     }
-
 
 }

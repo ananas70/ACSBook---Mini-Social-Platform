@@ -1,7 +1,6 @@
 package TemaTest;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -12,8 +11,6 @@ public class Comentariu implements Likeable {
     private Postare parentPost;
     private Date timestamp;
     private static int idCounter = 0;
-    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-
     static ArrayList<Comentariu> CommentsArray = new ArrayList<>();
 
     public Comentariu(){}
@@ -27,15 +24,9 @@ public class Comentariu implements Likeable {
     public String getUsername() {
         return user.getUsername();
     }
-
-    public String getparola() {
-        return user.getParola();
-    }
-
     public String getText() {
         return text;
     }
-
     public int getLikes() {
         return likes;
     }
@@ -44,11 +35,6 @@ public class Comentariu implements Likeable {
     }
     public Date getTimestamp() {
         return timestamp;
-    }
-
-
-    public Postare getParentPost() {
-        return parentPost;
     }
 
     public static void createSystemComment(java.lang.String[] args) {
@@ -96,7 +82,6 @@ public class Comentariu implements Likeable {
         writeCommentToFile(comentariu, "Comments.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Comment added successfully'}");
     }
-
     public static void writeCommentToFile(Comentariu comentariu, String file) {
         idCounter++;
         if(FileUtils.isEmptyFile(file))
@@ -110,7 +95,6 @@ public class Comentariu implements Likeable {
             e.printStackTrace();
         }
     }
-
     public static void deleteCommentById(java.lang.String[] args) {
         //"-u 'test2'", "-p 'test2'", "-id '1'"
         //1. Paramentrii -u sau -p lipsa
@@ -142,14 +126,13 @@ public class Comentariu implements Likeable {
             return;
         }
         // 5. succes
-//      //USER:username,POST_ID:id,COMMENT_ID:id,COMMENT:text
+        //USER:username,POST_ID:id,COMMENT_ID:id,COMMENT:text
         deleteCommentFromFile(foundCommentLine);
         String parts[] = foundCommentLine.split(","); //textul propriu-zis
         Comentariu foundComment = getCommentById(givenId, "Comments.txt");
         deleteCommentFromArrayList(foundComment);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-
     public static boolean PermissionToDelete(String line, String username) {
         //line e USER:user,POST_ID:id,COMMENT_ID:id,COMMENT:text (o linie intreaga din comments)
         String parts[] = line.split(",");
@@ -205,7 +188,6 @@ public class Comentariu implements Likeable {
         }
         return null;
     }
-
     public static void deleteCommentFromFile(String text) {
         File inputFile = new File("Comments.txt");
         File temporaryFile = new File("TempFile.txt");
@@ -275,7 +257,7 @@ public class Comentariu implements Likeable {
         writeCommentLikeToFile(extractedUsername, givenId, "CommentLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
     }
-    public static boolean verifyUserLikesHisComment(String userLikes, int givenId, String file) {
+    private static boolean verifyUserLikesHisComment(String userLikes, int givenId, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
         try {
@@ -294,7 +276,7 @@ public class Comentariu implements Likeable {
         }
         return false;
     }
-    public static void writeCommentLikeToFile(String userLikes, int givenId, String file) {
+    private static void writeCommentLikeToFile(String userLikes, int givenId, String file) {
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter(file, true));
             fileOut.write(userLikes + "LIKES" + givenId + "\n");
@@ -303,7 +285,7 @@ public class Comentariu implements Likeable {
             e.printStackTrace();
         }
     }
-    public static boolean verifyCommentAlreadyLiked(String userLikes, int givenId, String file) {
+    private static boolean verifyCommentAlreadyLiked(String userLikes, int givenId, String file) {
         if(FileUtils.isEmptyFile(file))
             return false;
         try {
@@ -394,17 +376,15 @@ public class Comentariu implements Likeable {
             }
         return postComments;
     }
-    public static void incrementUserLikes(Comentariu foundComment) {
+    private static void incrementUserLikes(Comentariu foundComment) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundComment.user.getUsername()) && utilizator.getParola().equals(foundComment.user.getParola()))
                 utilizator.incrementLikes();
     }
-    public static void decrementUserLikes(Comentariu foundComment) {
+    private static void decrementUserLikes(Comentariu foundComment) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundComment.user.getUsername()) && utilizator.getParola().equals(foundComment.user.getParola()))
                 utilizator.decrementLikes();
     }
-
-
 
 }

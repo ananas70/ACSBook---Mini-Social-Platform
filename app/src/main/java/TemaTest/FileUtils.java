@@ -3,10 +3,9 @@ package TemaTest;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class FileUtils {
-    static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+    public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     public static void copyFile(String sourceFilePath, String destinationFilePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(sourceFilePath));
@@ -21,19 +20,6 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
-
-    public static void printContent(String file){
-        try{
-            BufferedReader fileIn = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = fileIn.readLine()) != null) {
-                System.out.println(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static boolean isEmptyFile(String filename) {
         try {
             BufferedReader fileIn = new BufferedReader(new FileReader(filename));
@@ -45,16 +31,6 @@ public class FileUtils {
         }
     return false;
     }
-
-    public static void myprintArrayListPosts(ArrayList<Postare> PostsArray) {
-        for(Postare postare : PostsArray)
-            System.out.println(postare.getUsername() + postare.getText() + postare.getTimestamp() + postare.getId());
-    }
-    public static void myprintArrayListComments(ArrayList<Comentariu> CommentsArray) {
-        System.out.println("MEAP");
-        for(Comentariu comentariu: CommentsArray)
-            System.out.println(comentariu.getUsername() + comentariu.getText() + comentariu.getTimestamp());
-    }
     public static void printPostDetails(ArrayList<Postare> PostsArray) {
         //formats as requested in tests
         for(Postare postare : PostsArray){
@@ -63,7 +39,6 @@ public class FileUtils {
                 System.out.print(",");
         }
     }
-
     public static void printPostComments(ArrayList<Comentariu> CommentsArray) {
         //formats as requested in tests
         //       System.out.print("{'comment_id' : '1' ," +" 'comment_text' : 'Felicitari', 'comment_date' : '" + currentDateAsString + "', " +"'username' : 'test2', 'number_of_likes' : '0'}");
@@ -83,7 +58,6 @@ public class FileUtils {
                 System.out.print(",");
         }
     }
-
     public static void printMostCommentedPosts(ArrayList<Postare> PostsArray) {
         //formats as requested in tests
 
@@ -93,7 +67,6 @@ public class FileUtils {
                 System.out.print(",");
         }
     }
-
     public static void printMostLikedUsers(ArrayList<Utilizator> UsersArray) {
         //formats as requested in tests
         //{'username' : 'test2','number_of_likes' : '3' }
@@ -106,7 +79,6 @@ public class FileUtils {
             isFirst = false;
         }
     }
-
     public static void printMostFollowedUsers(ArrayList<Utilizator> UsersArray) {
         //formats as requested in tests
         boolean isFirst = true;
@@ -118,7 +90,6 @@ public class FileUtils {
             isFirst = false;
         }
     }
-
     public static void printFollowingsPosts(ArrayList<Postare> PostsArray) {
         //formats as requested in tests
         for(Postare postare : PostsArray){
@@ -127,7 +98,6 @@ public class FileUtils {
                 System.out.print(",");
         }
     }
-
     public static void printFollowingUsers(ArrayList<Utilizator> UsersArray) {
         //formats as requested in tests
 
@@ -138,6 +108,14 @@ public class FileUtils {
             else System.out.print(" ");
         }
     }
-
+    public static void deleteFileContents(String filename) {
+        try {
+            BufferedWriter fileOut = new BufferedWriter(new FileWriter(filename));
+            fileOut.write("");
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
