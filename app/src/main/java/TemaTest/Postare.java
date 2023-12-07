@@ -84,33 +84,22 @@ public class Postare implements Likeable {
         //5.Totul a mers bine
         Postare post = new Postare(newUser, extractedText);
         PostsArray.add(post);
-        writePostToFile(post, "Posts.txt");
-//        FileUtils.printArrayList(PostsArray);
+        post.writePostToFile(post, "Posts.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Post added successfully'}");
     }
     public static void deletePostById(java.lang.String[] args) {
         //"-u 'test'", "-p 'test'", "-id '1'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
-        //3. Id not provided
+        // Id not provided
         if(args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No identifier was provided'}");
             return;
         }
-        //4. Id not found
+        // Id not found
         String extractedId = args[2].substring(5, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
         String emptyString = "", foundPost;
@@ -119,21 +108,21 @@ public class Postare implements Likeable {
             System.out.println("{ 'status' : 'error', 'message' : 'The identifier was not valid'}");
             return;
         }
-        // 5. succes
-        deletePostFromFile(foundPost);
+        // Succes
+        FileUtils.deleteLineFromFile(foundPost, "Posts.txt");
         String[] parts = foundPost.split(","); //textul propriu-zis
         Postare postare = new Postare(newUser,parts[2].substring(5));
-        deletePostFromArrayList(postare);
+        postare.deletePostFromArrayList(postare);
         System.out.println("{ 'status' : 'ok', 'message' : 'Post deleted successfully'}");
     }
-    public static void deletePostFromArrayList(Postare postare) {
+    private void deletePostFromArrayList(Postare postare) {
         for(Postare aux : PostsArray)
             if(aux.getUsername().equals(postare.getUsername()) && aux.getText().equals(postare.getText())) {
                 PostsArray.remove(aux);
                 return;
             }
   }
-    public static void writePostToFile(Postare postare, String file) {
+    private void writePostToFile(Postare postare, String file) {
         //empty file - reset id
         idCounter++;
        if(FileUtils.isEmptyFile(file))
@@ -147,7 +136,7 @@ public class Postare implements Likeable {
             e.printStackTrace();
         }
     }
-    public static String verifyPostById(int givenId, String file) {
+    private static String verifyPostById(int givenId, String file) {
         String emptyString = "";
         //empty file
         if(FileUtils.isEmptyFile(file))
@@ -166,7 +155,7 @@ public class Postare implements Likeable {
         }
         return emptyString;
     }
-    public static Postare getPostByIdARRAYLIST(int givenId) {
+    public Postare getPostByIdARRAYLIST(int givenId) {
         if(PostsArray == null){
             System.out.println("Eroare la accesarea PostsArray");
             return null;
@@ -176,48 +165,20 @@ public class Postare implements Likeable {
                 return post;
         return null;
     }
-    public static void deletePostFromFile(String text) {
-        File inputFile = new File("Posts.txt");
-        File temporaryFile = new File("TempFile.txt");
-
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
-            writer.write("");
-            String line;
-            while ((line = reader.readLine()) != null)
-                if (!line.equals(text))
-                    writer.write(line + "\n");
-            FileUtils.copyFile("TempFile.txt","Posts.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void like(String[] args) {
         //"-u 'test'", "-p 'test'", "-post-id '1'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsARRAY(newUser)) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
-        //3. Post Id not provided
+        // Post Id not provided
         if (args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No post identifier to like was provided'}");
             return;
         }
-        //4. Post Id not found
+        // Post Id not found
         String extractedId = args[2].substring(10, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
         String emptyString = "", foundPostLine;
@@ -227,11 +188,11 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea de apreciat nu este corectă (sau această postare este deja apreciată, sau este a utilizatorului curent)
-        if(verifyUserLikesHisPost(extractedUsername, givenId)){
+        if(verifyUserLikesHisPost(newUser.getUsername(), givenId)){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
-        if (verifyPostAlreadyLiked(extractedUsername, givenId)) {
+        if (verifyAlreadyLiked(newUser.getUsername(), givenId, "PostLikes.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to like was not valid'}");
             return;
         }
@@ -244,21 +205,21 @@ public class Postare implements Likeable {
         foundPost.likes++;
 
         incrementUserLikes(foundPost);
-        writePostLikeToFile(extractedUsername, givenId);
+        writePostLikeToFile(newUser.getUsername(), givenId);
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
 
     }
-    private static void incrementUserLikes(Postare foundPost) {
+    private void incrementUserLikes(Postare foundPost) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
                 utilizator.incrementLikes();
     }
-    private static void decrementUserLikes(Postare foundPost) {
+    private void decrementUserLikes(Postare foundPost) {
         for(Utilizator utilizator : Utilizator.UsersArray)
             if(utilizator.getUsername().equals(foundPost.user.getUsername()) && utilizator.getParola().equals(foundPost.user.getParola()))
                 utilizator.decrementLikes();
     }
-    private static boolean verifyUserLikesHisPost(String userLikes, int givenId) {
+    private boolean verifyUserLikesHisPost(String userLikes, int givenId) {
         if(FileUtils.isEmptyFile("Posts.txt"))
             return false;
         try {
@@ -278,25 +239,7 @@ public class Postare implements Likeable {
         }
         return false;
     }
-    private static boolean verifyPostAlreadyLiked(String userLikes, int givenId) {
-        if(FileUtils.isEmptyFile("PostLikes.txt"))
-            return false;
-        try {
-            BufferedReader fileIn = new BufferedReader(new FileReader("PostLikes.txt"));
-            String line;
-            while ((line = fileIn.readLine()) != null) {
-                //testLIKES1
-                String[] parts = line.split("LIKES");
-                int foundId = Integer.parseInt(parts[1]);
-                if (userLikes.equals(parts[0]) && givenId == foundId)
-                    return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-    private static void writePostLikeToFile(String userLikes, int givenId) {
+    private void writePostLikeToFile(String userLikes, int givenId) {
         try {
             BufferedWriter fileOut = new BufferedWriter(new FileWriter("PostLikes.txt", true));
             fileOut.write(userLikes + "LIKES" + givenId + "\n");
@@ -308,27 +251,17 @@ public class Postare implements Likeable {
     @Override
     public void unlike(String[] args) {
         //"-u 'test'", "-p 'test'", "-post-id '1'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
-        //3. Post Id not provided
+        // Post Id not provided
         if (args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No post identifier to unlike was provided'}");
             return;
         }
-        //4. Post Id not found
+        // Post Id not found
         String extractedId = args[2].substring(10, args[2].length() - 1);
         int givenId = Integer.parseInt(extractedId);
         String emptyString = "", foundPostLine;
@@ -338,7 +271,7 @@ public class Postare implements Likeable {
             return;
         }
         //Postarea pentru unlike nu este corecta (sau această postare este deja unliked)
-        if (!verifyPostAlreadyLiked(extractedUsername, givenId)) {
+        if (!verifyAlreadyLiked(newUser.getUsername(), givenId, "PostLikes.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier to unlike was not valid'}");
             return;
         }
@@ -350,111 +283,71 @@ public class Postare implements Likeable {
         }
         foundPost.likes--;
         decrementUserLikes(foundPost);
-        unlikePostFromFile(extractedUsername, givenId);
+        unlikeFromFile(newUser.getUsername(), givenId,"PostLikes.txt");
         System.out.println("{ 'status' : 'ok', 'message' : 'Operation executed successfully'}");
-    }
-    private static void unlikePostFromFile(String userLikes, int givenId) {
-        File inputFile = new File("PostLikes.txt");
-        File temporaryFile = new File("TempFile.txt");
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
-            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
-            String line;
-            while ((line = reader.readLine()) != null){
-                //"userLIKESid"
-                String[] parts = line.split("LIKES");
-                if ((parts[0].equals(userLikes) && Integer.parseInt(parts[1]) == givenId))
-                    writer.write(line + "\n");
-            }
-            FileUtils.copyFile("TempFile.txt", "PostLikes.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
     public static void getUserPosts(java.lang.String[] args){
         //"-u 'test'", "-p 'test'", "-username 'test2'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
-        //3. Username-ul pentru listare postări nu a fost găsit
+        // Username-ul pentru listare postări nu a fost găsit
         if(args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No username to list posts was provided'}");
             return;
         }
-        //4. Username-ul pentru listare postări nu este corect (sau acest username este deja unfollowed)
+        // Username-ul pentru listare postări nu este corect (sau acest username este deja unfollowed)
         String followedUser = args[2].substring(11, args[2].length()-1);
         if(!Utilizator.verifyUserByUsernameFILE(followedUser, "Users.txt")) {
             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
             return;
         }
-        if(!Utilizator.verifyAlreadyFollowed(extractedUsername, followedUser, "Followers.txt")){
+        if(!newUser.verifyAlreadyFollowed(newUser.getUsername(), followedUser, "Followers.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The username to list posts was not valid'}");
             return;
         }
-        //5. Totul a mers bine
+        // Totul a mers bine
         //bagam toate postarile intr-un alt ArrayList
         ArrayList<Postare> userPosts = new ArrayList<>();
         for(Postare post : PostsArray) {
             if(post.getUsername().equals(followedUser))
                 userPosts.add(post);
         }
-        //sortare yayy
+        //sortare
         userPosts.sort(Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
-        //afisare yayy
+        //afisare
         System.out.print("{'status' : 'ok', 'message' :" + " [");
         FileUtils.printPostDetails(userPosts);
         System.out.print("]}");
     }
     public static void getPostDetails(java.lang.String[] args){
         //"-u 'test'", "-p 'test'", "-post-id '1'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
-        //3. Identificatorul pentru postare nu a fost găsit
+        // Identificatorul pentru postare nu a fost găsit
         if(args.length < 3) {
             System.out.println("{ 'status' : 'error', 'message' : 'No post identifier was provided'}");
             return;
         }
-        //4. Identificatorul pentru postare nu este corect (sau acest username este deja unfollowed)
+        // Identificatorul pentru postare nu este corect (sau acest username este deja unfollowed)
         int givenId = Integer.parseInt(args[2].substring(10, args[2].length()-1));
 
-        Postare post = new Postare();
-        post = getPostByIdARRAYLIST(givenId);
+        Postare post = new Postare().getPostByIdARRAYLIST(givenId);
         if(post == null) {
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
             return;
         }
-        if(!(extractedUsername.equals(post.getUsername())))
-            if(!Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt")){
-//            System.out.println("u1: "+extractedUsername + " u2:" + post.getUsername());
+        if(!(newUser.getUsername().equals(post.getUsername())))
+            if(!newUser.verifyAlreadyFollowed(newUser.getUsername(), post.getUsername(), "Followers.txt")){
             System.out.println("{ 'status' : 'error', 'message' : 'The post identifier was not valid'}");
             return;
         }
-        //5. Totul a mers bine
+        // Totul a mers bine
         System.out.print("{'status' : 'ok', 'message' : [{'post_text' : '"+post.text+"', 'post_date' :'" + FileUtils.dateFormat.format(post.timestamp) + "', 'username' : '"+post.user+"', 'number_of_likes' :" +" '"+post.likes+"', ");
         //ne trebuie un ArrayList cu comentariile
         ArrayList <Comentariu> postComments = Comentariu.getPostComments(post);
@@ -466,21 +359,11 @@ public class Postare implements Likeable {
     }
     public static void getMostLikedPosts(String[] args) {
         //"-u 'test'", "-p 'test'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
         //3. Totul a mers bine
         ArrayList <Postare> mostLikedPosts = PostsArray;
         mostLikedPosts.sort(Comparator.comparingInt(Postare::getLikes).reversed());
@@ -490,21 +373,11 @@ public class Postare implements Likeable {
     }
     public static void getMostCommentedPosts(String[] args) {
         //"-u 'test'", "-p 'test'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
         //3. Totul a mers bine
         ArrayList <Postare> mostCommentedPosts = PostsArray;
         mostCommentedPosts.sort(Comparator.comparingInt(Postare::getCommentsCounter).reversed());
@@ -514,35 +387,24 @@ public class Postare implements Likeable {
     }
     public static void getFollowingsPosts(java.lang.String[] args){
         //"-u 'test'", "-p 'test'"
-        //1. Paramentrii -u sau -p lipsa
-        if (args.length == 0 || args.length == 1) {
-            System.out.println("{ 'status' : 'error', 'message' : 'You need to be authenticated'}");
+        if(!Utilizator.verifyAuthenticated(args))
             return;
-        }
-        String extractedUsername = args[0].substring(4, args[0].length() - 1);
-        String extractedParola = args[1].substring(4, args[1].length() - 1);
-
-        Utilizator newUser = Utilizator.createUser(extractedUsername, extractedParola);
-        //2. Username nu există, sau username și parola sunt greșite
-
-        if (!Utilizator.verifyUserByCredentialsFILE(newUser, "Users.txt")) {
-            System.out.println("{ 'status' : 'error', 'message' : 'Login failed'}");
+        Utilizator newUser = new Utilizator().createUserFromInput(args);
+        if(newUser == null)
             return;
-        }
         //3. Totul a mers bine
         //Adaugam toate postarile intr-un alt ArrayList
         ArrayList<Postare> followingsPosts = new ArrayList<>();
         for(Postare post : PostsArray) {
-            if(Utilizator.verifyAlreadyFollowed(extractedUsername, post.getUsername(), "Followers.txt"))
+            if(newUser.verifyAlreadyFollowed(newUser.getUsername(), post.getUsername(), "Followers.txt"))
                 followingsPosts.add(post);
         }
         //sortare
         followingsPosts.sort(Collections.reverseOrder(Comparator.comparing(Postare::getTimestamp)));
+
         //afisare
         System.out.print("{'status' : 'ok', 'message' :" + " [");
-
         FileUtils.printFollowingsPosts(followingsPosts);
         System.out.print("]}");
     }
-
 }

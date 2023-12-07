@@ -117,5 +117,21 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
+    public static void deleteLineFromFile(String text, String file) {
+        File inputFile = new File(file);
+        File temporaryFile = new File("TempFile.txt");
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(temporaryFile));
+            writer.write("");
+            String line;
+            while ((line = reader.readLine()) != null)
+                if (!line.equals(text))
+                    writer.write(line + "\n");
+            FileUtils.copyFile("TempFile.txt",file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
