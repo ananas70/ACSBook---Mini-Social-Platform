@@ -4,6 +4,7 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+/*Clasa folosita pentru a implementa metode ce țin de afisarea datelor conform formatelor specificate, precum si de manipularea fisierelor (copiere, stergere)*/
 public class FileUtils {
     public static SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
@@ -118,6 +119,7 @@ public class FileUtils {
         }
     }
     public static void deleteLineFromFile(String text, String file) {
+        //Sterge linia gasita in fisier
         File inputFile = new File(file);
         File temporaryFile = new File("TempFile.txt");
         try {
@@ -133,5 +135,4 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
-
 }

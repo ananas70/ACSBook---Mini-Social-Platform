@@ -27,20 +27,16 @@ public class App {
             Utilizator.unfollowUserByUsername(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-like-post":
-            Postare postare = new Postare();
-            postare.like(Arrays.copyOfRange(strings,1,strings.length));
+            new Postare().like(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-unlike-post":
-            postare = new Postare();
-            postare.unlike(Arrays.copyOfRange(strings,1,strings.length));
+            new Postare().unlike(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-like-comment":
-            Comentariu comentariu = new Comentariu();
-            comentariu.like(Arrays.copyOfRange(strings,1,strings.length));
+            new Comentariu().like(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-unlike-comment":
-            comentariu = new Comentariu();
-            comentariu.unlike(Arrays.copyOfRange(strings,1,strings.length));
+            new Comentariu().unlike(Arrays.copyOfRange(strings,1,strings.length));
             break;
         case "-get-followings-posts":
             Postare.getFollowingsPosts(Arrays.copyOfRange(strings,1,strings.length));
