@@ -10,7 +10,7 @@ public class Postare implements Likeable {
     private Date timestamp;
     private static int idCounter = 0;
     static ArrayList<Postare> PostsArray = new ArrayList<>();
-
+    String string;
     public Postare() {}
 
     public Postare(Utilizator user, String text) {
