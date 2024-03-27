@@ -44,6 +44,6 @@ How I would refactor commands and responses in the application:
 
 1. Using the recently acquired knowledge in Course 9, I would adopt the serialization technique for more efficient data management. Thus, I would save objects (Users, Posts, Comments) directly to a file, eliminating the need to manually parse complex data structures (as done here).
 
-2. Instead of storing in text files, I could refactor to use a database management system (e.g., MySQL) instead of storing data in text files. Eventually, this may involve integrating JSON files.
+2. Instead of storing in text files, I could refactor to use a database management system (e.g., MySQL) instead of storing data in text files. Possibly, this may involve integrating JSON files.
 
 3. Adding password validation: Users should not be allowed to use a password that is too short or too simple. We could introduce methods for analyzing or even suggesting strong and valid passwords.
